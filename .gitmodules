@@ -1,0 +1,6 @@
+[submodule "lib/dynamic_array"]
+	path = lib/dynamic_array
+	url = https://github.com/MeerkatBoss/dynamic-array
+[submodule "lib/logger"]
+	path = lib/logger
+	url = https://github.com/MeerkatBoss/logger
