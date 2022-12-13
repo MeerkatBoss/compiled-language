@@ -1,31 +1,48 @@
-LEXEME(VAR, "var")
+LEXEME(VAR, "int x = ")
 
-LEXEME(FUNC, "fun")
+LEXEME(FUNC, "aaa aa a")
 
-LEXEME(BLOCK_START, "{")
+LEXEME(BLOCK_START, "v====")
 
-LEXEME(BLOCK_END, "}")
+LEXEME(BLOCK_END, "^====")
 
-LEXEME(ASSIGN, "<-")
+LEXEME(INIT, "= 64")
 
-LEXEME(STMT_END, ";")
+LEXEME(ASSIGN, "= 72 +")
 
-LEXEME(IF, "if")
+LEXEME(STMT_END, "PTPTPTPT!!!")
 
-LEXEME(ELSE, "else")
+LEXEME(IF, "$300")
 
-LEXEME(WHILE, "while")
+LEXEME(ELSE, "you've the wrong door")
 
-LEXEME(GROUP_LEFT, "(")
+LEXEME(WHILE, "<>")
 
-LEXEME(GROUP_RIGHT, ")")
+LEXEME(GROUP_LEFT, "<%")
 
-LEXEME(PLUS, "+")
+LEXEME(GROUP_RIGHT, "%>")
 
-LEXEME(MINUS, "-")
+LEXEME(PLUS, "#")
 
-LEXEME(STAR, "*")
+LEXEME(MINUS, "subtract")
 
-LEXEME(SLASH, "/")
+LEXEME(STAR, "<^>")
 
-LEXEME(COMMA, ",")
+LEXEME(SLASH, "0")
+
+LEXEME(COMMA, "_")
+
+LEXEME(LESS, "lt")
+
+LEXEME(GREATER, "gt")
+
+LEXEME(LEQ, "leq")
+
+LEXEME(GEQ, "geq")
+
+LEXEME(EQ, "the same as")
+
+LEXEME(NEQ, "totally different from")
+
+LEXEME(RETURN, "<<<")
+

@@ -87,8 +87,8 @@ int parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) *
         size_t len = current_pos.offset - token_pos.offset;
 
         LOG_ASSERT_ERROR(0, return -1,
-            "Invalid token '%.*s' at char %zu",
-            str + token_pos.offset, (int)len, token_pos.offset);
+            "Invalid token '%.*s' at line %zu column %zu",
+            str + token_pos.offset, (int)len, token_pos.line, token_pos.column);
     }
 
     array_push(tokens, make_token(strdup(""), TOK_EOF, current_pos.line, current_pos.column));

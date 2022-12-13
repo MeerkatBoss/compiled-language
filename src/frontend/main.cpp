@@ -19,12 +19,27 @@ int main()
     lexer_tree tree = {};
     lexer_tree_ctor(&tree);
 
-    lexer_tree_add_word(&tree, "= 64", TOK_ASSIGN);
-    lexer_tree_add_word(&tree, "int x = ", TOK_VAR);
+    #define LEXEME(name, str, ...) lexer_tree_add_word(&tree, str, TOK_##name);
+    #include "lexemes.h"
+    #undef LEXEME
     lexer_tree_add_numbers(&tree);
     lexer_tree_add_names(&tree);
 
-    parse_tokens("int x = y = 6451", &tree, &tokens);
+
+    // lexer_tree_add_word(&tree, "= 64", TOK_ASSIGN);
+    // lexer_tree_add_word(&tree, "int x = ", TOK_VAR);
+    // lexer_tree_add_numbers(&tree);
+    // lexer_tree_add_names(&tree);
+
+    parse_tokens(
+        "aaa aa a main <%%>\n"
+        "v====\n"
+        "    int x = abc = 643 PTPTPTPT!!!\n"
+        "    $300 <% abc is the same as 3 %>\n"
+        "       print <% abc %> PTPTPTPT!!!\n"
+        "   <<< 0.0PTPTPTPT!!!"
+        "^====\n",
+    &tree, &tokens);
 
     token_array_print(&tokens, stdout);
 

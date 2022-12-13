@@ -73,7 +73,10 @@ void lexer_tree_add_word(lexer_tree *tree, const char *str, token_type type)
         cur_node = cur_node->next[*c];
     }
 
-    LOG_ASSERT((cur_node->type == TOK_NAME || cur_node->type == TOK_ERROR) && "Word already added", return);
+    LOG_ASSERT(
+            (cur_node->type == TOK_NAME ||
+             cur_node->type == TOK_ERROR||
+             cur_node->type == TOK_NUM) && "Word already added", return);
     cur_node->type = type;
 }
 
@@ -108,7 +111,7 @@ static void delete_subtree(lexer_tree *tree, lexer_node *node)
 static void subtree_add_names(lexer_tree *tree, lexer_node *node)
 {
     for (int i = 0; i <= CHAR_MAX; i++)
-        if (is_name_char(i) && node->next[i] != node)
+        if (is_name_char(i) && node->next[i] != node && node != tree->num)
         {
             if (node->next[i])
                 subtree_add_names(tree, node->next[i]);
