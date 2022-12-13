@@ -1,0 +1,31 @@
+LEXEME(VAR, "var")
+
+LEXEME(FUNC, "fun")
+
+LEXEME(BLOCK_START, "{")
+
+LEXEME(BLOCK_END, "}")
+
+LEXEME(ASSIGN, "<-")
+
+LEXEME(STMT_END, ";")
+
+LEXEME(IF, "if")
+
+LEXEME(ELSE, "else")
+
+LEXEME(WHILE, "while")
+
+LEXEME(GROUP_LEFT, "(")
+
+LEXEME(GROUP_RIGHT, ")")
+
+LEXEME(PLUS, "+")
+
+LEXEME(MINUS, "-")
+
+LEXEME(STAR, "*")
+
+LEXEME(SLASH, "/")
+
+LEXEME(COMMA, ",")

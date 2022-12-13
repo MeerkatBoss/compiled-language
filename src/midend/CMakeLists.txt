@@ -1,5 +1,7 @@
-add_executable(mbc-mid main.cpp)
+add_executable(mbc_mid main.cpp)
 
-target_link_libraries(mbc-mid PUBLIC liblogs)
+target_link_libraries(mbc_mid PUBLIC liblogs)
 
-target_include_directories(mbc-mid PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(mbc_mid PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+add_run_target(mbc_mid)

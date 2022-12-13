@@ -1,5 +1,7 @@
-add_executable(mbc-front main.cpp)
+add_executable(mbc_front main.cpp)
 
-target_link_libraries(mbc-front PUBLIC liblogs)
+target_link_libraries(mbc_front PUBLIC liblogs lexer)
 
-target_include_directories(mbc-front PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(mbc_front PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+add_run_target(mbc_front)

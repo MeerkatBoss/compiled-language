@@ -8,7 +8,7 @@ ARG     ::= ["var" NAME ARG]
 BLOCK   ::= ['{' {STMT} '}']
 STMT    ::= BLOCK | ASS | NVAR | IF | WHILE | RET
 EXPR    ::= OR
-ASS     ::= VAR "<-" EXPR ';'
+ASS     ::= NAME "<-" EXPR ';'
 IF      ::= "if" '(' EXPR ')' BRANCH
 BRANCH  ::= STMT ["else" STMT]
 WHILE   ::= "while" '(' EXPR ')' STMT
@@ -22,11 +22,9 @@ SUM     ::= TERM [('+' | '-') SUM]
 TERM    ::= UNARY [('*' | '/') TERM]
 UNARY   ::= '-' UNARY | ATOM
 ATOM    ::= NUM | VAR | CALL
-CALL    ::= FUNC '(' PAR ')'
+CALL    ::= NAME '(' PAR ')'
 PAR     ::= [EXPR ',' PAR]
-
 VAR     ::= NAME
-FUNC    ::= NAME
 
 NAME    ::= <'a-zA-Z0-9_'> {<'a-zA-Z0-9_'>}
 NUM     ::= <'0-9'> {<'0-9'>}
