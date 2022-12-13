@@ -15,75 +15,83 @@ struct file_pos
 int parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) * tokens)
 {
     const lexer_node* cur_node = tree->root;
-    file_pos pos = {0, 0, 0};
-    file_pos tok_start = {0, 0, 0};
+
+    file_pos current_pos = {0, 0, 0};
+    file_pos token_pos = {0, 0, 0};
+    file_pos complete_pos = {0, 0, 0};
+
+    const lexer_node* complete = NULL;
     size_t str_length = strlen(str);
 
-    for (; pos.offset <= str_length; pos.offset++)
+    while (current_pos.offset <= str_length)
     {
-        char cur_c = str[pos.offset];
+        char cur_c = str[current_pos.offset];
+        file_pos lst_pos = current_pos;
 
-        // if (cur_c == '\n' || pos.offset == 0)
-        // {
-        //     pos.line++;
-        //     pos.column = 1;
-        // }
-        // else
-        //     pos.column++;
+        if (cur_c == '\n' || current_pos.offset == 0)
+        {
+            current_pos.line++;
+            current_pos.column = 1;
+        }
+        else
+            current_pos.column++;
         
-        if (cur_node == tree->root) tok_start = pos;
+        if (cur_node == tree->root) token_pos = current_pos;
+        if (cur_node->type != TOK_ERROR)
+        {
+            complete = cur_node;
+            complete_pos = current_pos;
+        }
 
         if (cur_node->next[cur_c])
         {
             cur_node = cur_node->next[cur_c];
+            current_pos.offset++;
             continue;
         }
 
         if (cur_node->type != TOK_ERROR)
         {
-            size_t len = pos.offset - tok_start.offset;
-            array_push(tokens, {
-                            .type = cur_node->type,
-                            .line_num = tok_start.line,
-                            .char_num = tok_start.column,
-                            .str = strndup(str + tok_start.offset, len)
-                        });
+            size_t len = current_pos.offset - token_pos.offset;
+            char* tok_str = strndup(str + token_pos.offset, len);
+
+            array_push(tokens, make_token(
+                                        tok_str,
+                                        cur_node->type,
+                                        token_pos.line,
+                                        token_pos.column));
             cur_node = tree->root;
 
-            if (cur_c != '\0') pos.offset--;
-
+            current_pos = lst_pos;
             continue;
         }
 
-        if (cur_node->prev_complete != NULL)
+        if (complete != NULL)
         {
-            size_t len = pos.offset - tok_start.offset - cur_node->excess;
+            size_t len = complete_pos.offset - token_pos.offset;
+            char* tok_str = strndup(str + token_pos.offset, len);
 
-            array_push(tokens, {
-                            .type = cur_node->prev_complete->type,
-                            .line_num = tok_start.line,
-                            .char_num = tok_start.column,
-                            .str = strndup(str + tok_start.offset, len)
-                        });
+            array_push(tokens, make_token(
+                                        tok_str,
+                                        complete->type,
+                                        token_pos.line,
+                                        token_pos.column));
+
             cur_node = tree->root;
-            pos.offset -= cur_node->excess + 1;
-
+            complete = NULL;
+            current_pos = complete_pos;
+            complete_pos = {0, 0, 0};
             continue;
         }
 
-        size_t len = pos.offset - tok_start.offset - cur_node->excess;
+        size_t len = current_pos.offset - token_pos.offset;
 
         LOG_ASSERT_ERROR(0, return -1,
             "Invalid token '%.*s' at char %zu",
-            str + pos.offset - len, (int)len, tok_start.offset);
+            str + token_pos.offset, (int)len, token_pos.offset);
     }
 
-    array_push(tokens, {
-                    .type = TOK_EOF,
-                    .line_num = pos.line,
-                    .char_num = pos.column,
-                    .str = strdup("")
-                });
+    array_push(tokens, make_token(strdup(""), TOK_EOF, current_pos.line, current_pos.column));
 
     return 0;
 }

@@ -22,6 +22,7 @@ struct token
     token_type type;
     size_t line_num;
     size_t char_num;
+    double num;
     char* str;
 };
 
@@ -35,5 +36,6 @@ inline void delete_element(ARRAY_ELEMENT* element) { free(element->str); memset(
 #undef ARRAY_ELEMENT
 
 void token_array_print(const dynamic_array(token)* tokens, FILE* stream);
+token make_token(char* str, token_type type, size_t line_num, size_t char_num);
 
 #endif

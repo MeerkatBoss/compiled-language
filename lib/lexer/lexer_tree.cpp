@@ -6,18 +6,21 @@
 #include "lexer_tree.h"
 
 static inline bool is_name_char(int c) { return isalnum(c) || c == '_'; }
+static inline bool is_num_char(int c) { return isdigit(c) || c == '.'; }
 
 void lexer_tree_ctor(lexer_tree* tree)
 {
     tree->root = lexer_node_ctor(TOK_ERROR);
     tree->name = lexer_node_ctor(TOK_NAME);
+    tree->num  = lexer_node_ctor(TOK_NUM);
+
     for (int i = 0; i <= CHAR_MAX; i++)
     {
-        if (is_name_char(i))
-            tree->name->next[i] = tree->name;
-        if (isspace(i))
-            tree->root->next[i] = tree->root;
+        if (is_name_char(i)) tree->name->next[i] = tree->name;
+        if (is_num_char(i))  tree->num->next[i]  = tree->num;
+        if (isspace(i))      tree->root->next[i] = tree->root;
     }
+    tree->root->next['\0'] = lexer_node_ctor(TOK_EOF);
 }
 
 static void delete_subtree(lexer_tree* tree, lexer_node* node);
@@ -48,14 +51,24 @@ void lexer_node_dtor(lexer_node *node)
 
 void lexer_tree_add_word(lexer_tree *tree, const char *str, token_type type)
 {
-    bool is_name_pref = true;   
+    bool is_name_pref = true;
+    bool is_digit_pref = true;
     lexer_node* cur_node = tree->root;
 
     for (const char* c = str; *c != '\0'; c++)
     {
-        is_name_pref &= is_name_char(*c);
+        is_name_pref  &= is_name_char(*c);
+        is_digit_pref &= is_num_char (*c);
+
         if (!cur_node->next[*c])
-            cur_node->next[*c] = lexer_node_ctor(is_name_pref ? TOK_NAME : TOK_ERROR);
+        {
+            if (is_digit_pref)
+                cur_node->next[*c] = lexer_node_ctor(TOK_NUM);
+            else if (is_name_pref)
+                cur_node->next[*c] = lexer_node_ctor(TOK_NAME);
+            else
+                cur_node->next[*c] = lexer_node_ctor(TOK_ERROR);
+        }
 
         cur_node = cur_node->next[*c];
     }
@@ -65,23 +78,25 @@ void lexer_tree_add_word(lexer_tree *tree, const char *str, token_type type)
 }
 
 static void subtree_add_names(lexer_tree* tree, lexer_node* node);
+static void subtree_add_numbers(lexer_tree* tree, lexer_node* node);
 
 void lexer_tree_add_names(lexer_tree* tree)
 {
     subtree_add_names(tree, tree->root);
 }
 
-static void subtree_build(lexer_tree *tree, lexer_node* node, lexer_node* complete = NULL, size_t excess = 0);
-
-void lexer_tree_build(lexer_tree *tree)
+void lexer_tree_add_numbers(lexer_tree *tree)
 {
-    subtree_build(tree, tree->root);
+    subtree_add_numbers(tree, tree->root);
 }
 
 static void delete_subtree(lexer_tree *tree, lexer_node *node)
 {
     for (int i = 0; i <= CHAR_MAX; i++)
-        if (node->next[i] && node->next[i] != tree->name && node->next[i] != node)
+        if (node->next[i]
+            && node->next[i] != tree->name
+            && node->next[i] != tree->num
+            && node->next[i] != node)
         {
             delete_subtree(tree, node->next[i]);
             node->next[i] = NULL;
@@ -93,7 +108,7 @@ static void delete_subtree(lexer_tree *tree, lexer_node *node)
 static void subtree_add_names(lexer_tree *tree, lexer_node *node)
 {
     for (int i = 0; i <= CHAR_MAX; i++)
-        if (is_name_char(i))
+        if (is_name_char(i) && node->next[i] != node)
         {
             if (node->next[i])
                 subtree_add_names(tree, node->next[i]);
@@ -102,20 +117,14 @@ static void subtree_add_names(lexer_tree *tree, lexer_node *node)
         }
 }
 
-static void subtree_build(lexer_tree *tree, lexer_node *node, lexer_node *complete, size_t excess)
+void subtree_add_numbers(lexer_tree *tree, lexer_node *node)
 {
-    if (node->type != TOK_ERROR)
-    {
-        complete = node;
-        excess = 0;
-    }
-    else if (complete)
-    {
-        node->prev_complete = complete;
-        node->excess = excess;
-    }
-
     for (int i = 0; i <= CHAR_MAX; i++)
-        if (node->next[i] && node->next[i] != tree->name && node->next[i] != node)
-            subtree_build(tree, node->next[i], complete, excess+1);
+        if (is_num_char(i))
+        {
+            if (node->next[i] && node->next[i] != node)
+                subtree_add_numbers(tree, node->next[i]);
+            else
+                node->next[i] = tree->num;
+        }
 }

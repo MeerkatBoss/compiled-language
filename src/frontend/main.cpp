@@ -19,14 +19,12 @@ int main()
     lexer_tree tree = {};
     lexer_tree_ctor(&tree);
 
-    lexer_tree_add_word(&tree, "aa aaa", TOK_ASSIGN);
-    lexer_tree_add_word(&tree, "aa", TOK_VAR);
-    lexer_tree_add_word(&tree, "bbb", TOK_NUM);
+    lexer_tree_add_word(&tree, "= 64", TOK_ASSIGN);
+    lexer_tree_add_word(&tree, "int x = ", TOK_VAR);
+    lexer_tree_add_numbers(&tree);
     lexer_tree_add_names(&tree);
 
-    lexer_tree_build(&tree);
-
-    parse_tokens("aa bb aa aaa bbb", &tree, &tokens);
+    parse_tokens("int x = y = 6451", &tree, &tokens);
 
     token_array_print(&tokens, stdout);
 
