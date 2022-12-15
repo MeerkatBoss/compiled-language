@@ -13,6 +13,7 @@
 #define TREE_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "math_utils.h"
 
@@ -32,8 +33,18 @@ enum node_type
 enum op_type
 {
     #define OP_TYPE(name, ...) OP_##name,
+
+    #define CMP_TYPE(name, ...) OP_##name,      // Standard compliance
+    #define LOGIC_TYPE(name, ...) OP_##name,    // Standard compliance
+
     #include "op_types.h"
+    #include "cmp_types.h"                      // Standard compliance
+    #include "logic_types.h"                    // Standard compliance
+
     #undef OP_TYPE
+
+    #undef CMP_TYPE                             // Standard compliance
+    #undef LOGIC_TYPE                           // Standard compliance
 };
 
 /**
@@ -46,6 +57,9 @@ enum cmp_type
     #undef CMP_TYPE
 };
 
+/**
+ * @brief Operation type for AST nodes of type `NODE_LOGIC`
+ */
 enum logic_type
 {
     #define LOGIC_TYPE(name, ...) LOGIC_##name,
@@ -138,9 +152,9 @@ void delete_subtree(ast_node* node);
 /**
  * @brief Create `abstract_syntax_tree` instance
  * 
- * @return Constructed `abstract_syntax_tree` instance
+ * @param[out] tree Constructed instance
  */
-abstract_syntax_tree* tree_ctor(void);
+void tree_ctor(abstract_syntax_tree* tree);
 
 /**
  * @brief Destroy `abstract_syntax_tree`
@@ -148,6 +162,12 @@ abstract_syntax_tree* tree_ctor(void);
  * @param[inout] tree `abstract_syntax_tree` instance to be destroyed
  */
 void tree_dtor(abstract_syntax_tree* tree);
+
+// TODO: docs
+void tree_print(const abstract_syntax_tree* tree, FILE* output);
+
+// TODO: docs
+void tree_read(abstract_syntax_tree* tree,  FILE* input);
 
 /**
  * @brief Get iterator to first tree element
