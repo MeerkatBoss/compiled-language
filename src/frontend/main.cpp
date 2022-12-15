@@ -25,12 +25,6 @@ int main()
     lexer_tree_add_numbers(&tree);
     lexer_tree_add_names(&tree);
 
-
-    // lexer_tree_add_word(&tree, "= 64", TOK_ASSIGN);
-    // lexer_tree_add_word(&tree, "int x = ", TOK_VAR);
-    // lexer_tree_add_numbers(&tree);
-    // lexer_tree_add_names(&tree);
-
     parse_tokens(
         "aaa aa a main <%%>\n"
         "v====\n"
