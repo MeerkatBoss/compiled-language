@@ -169,9 +169,10 @@ static void print_cmp(cmp_type cmp, FILE* output) __attribute__((unused));
 static void print_logic(logic_type logic, FILE* output) __attribute__((unused));
 static void print_indent(int indent, FILE* output);
 
+static inline bool is_leaf(const ast_node* node) { return !node->left && !node->right; }
+
 static void node_print(const ast_node *node, FILE *output, int indent)
 {
-    print_indent(indent, output);
     fputc('{', output);
     if (!node)
     {
@@ -179,13 +180,20 @@ static void node_print(const ast_node *node, FILE *output, int indent)
         return;
     }
     indent++;
-    putc('\n', output);
+    if (!is_leaf(node))
+    {
+        fputc('\n', output);
+        print_indent(indent, output);
+    }
+    else fputc(' ',  output);
 
-    print_indent(indent, output);
     print_type(node->type, output);
-    fputs(",\n", output);
-
-    print_indent(indent, output);
+    if (!is_leaf(node))
+    {
+        fputs(",\n", output);
+        print_indent(indent, output);
+    }
+    else fputs(", ",  output);
     switch (node->type)
     {
         case NODE_OP:    print_op   (node->value.op,    output); break;
@@ -198,7 +206,7 @@ static void node_print(const ast_node *node, FILE *output, int indent)
                 node->type == NODE_CMP ? "CMP" : "LOGIC");
             return;
 
-        case NODE_NUM:   fprintf(output, "%.3lf", node->value.num); break;
+        case NODE_CONST:   fprintf(output, "%.3lf", node->value.num); break;
 
         case NODE_NVAR:
         case NODE_NFUN:
@@ -224,14 +232,29 @@ static void node_print(const ast_node *node, FILE *output, int indent)
             log_message(MSG_WARNING, "Unknown 'node_type' enum value: %d", (int)node->type);
             return;
     }
-    fputs(",\n", output);
+    if (!is_leaf(node))
+    {
+        fputs(",\n", output);
+        print_indent(indent, output);
+    }
+    else fputs(", ",  output);
 
-    node_print(node-> left, output, indent);
-    fputs(",\n", output);
+    node_print(node->left, output, indent);
+    if (!is_leaf(node))
+    {
+        fputs(",\n", output);
+        print_indent(indent, output);
+    }
+    else fputs(", ",  output);
+
     node_print(node->right, output, indent);
+    if (!is_leaf(node))
+    {
+        fputc('\n', output);
+        print_indent(indent-1, output);
+    }
+    else fputc(' ', output);
 
-    fputc('\n', output);
-    print_indent(indent-1, output);
     fputc('}', output);
 }
 
@@ -273,7 +296,7 @@ static ast_node *node_read(FILE *input)
                 node->type == NODE_CMP ? "CMP" : "LOGIC");
             return NULL;
 
-        case NODE_NUM:
+        case NODE_CONST:
             LOG_ASSERT_ERROR(fscanf(input, " %lf", &node->value.num) == 1, { delete_node(node); return NULL; },
                 "Invalid number format in tree file.", NULL);
             break;

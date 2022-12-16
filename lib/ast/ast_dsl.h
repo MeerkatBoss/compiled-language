@@ -8,7 +8,7 @@
 /* TODO: docs */
 
 inline double   get_num(const ast_node* node)               { return node->value.num; }
-inline bool     is_num (const ast_node* node)               { return node && node->type == NODE_NUM;}
+inline bool     is_num (const ast_node* node)               { return node && node->type == NODE_CONST;}
 inline bool     num_cmp(const ast_node* node, double num)   { return is_num(node) && compare_double(get_num(node), num) == 0; }
 
 inline op_type  get_op (const ast_node* node)               { return node->value.op; }

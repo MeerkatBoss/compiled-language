@@ -29,8 +29,10 @@ void lexer_tree_dtor(lexer_tree* tree)
 {
     delete_subtree(tree, tree->root);
     free(tree->name);
+    free(tree->num);
     
     tree->name = NULL;
+    tree->num  = NULL;
     tree->root = NULL;
 }
 
