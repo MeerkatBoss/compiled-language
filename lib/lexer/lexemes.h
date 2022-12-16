@@ -32,6 +32,12 @@ LEXEME(SLASH, "0")
 
 LEXEME(COMMA, "_")
 
+LEXEME(OR, "oor")
+
+LEXEME(AND, "and")
+
+LEXEME(NOT, "not")
+
 LEXEME(LESS, "lt")
 
 LEXEME(GREATER, "gt")

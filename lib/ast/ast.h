@@ -123,11 +123,13 @@ struct abstract_syntax_tree
 /**
  * @brief Create new tree node with specified parent and no children.
  * 
+ * @param[in] type Node type
  * @param[in] data Data stored in node
- * @param[in] parent Parent node
+ * @param[inout] left Left child node
+ * @param[inout] right Right child node
  * @return Allocated `ast_node` instance
  */
-ast_node* make_node(node_type type, node_value val, ast_node* parent = NULL);
+ast_node* make_node(node_type type, node_value val, ast_node* left, ast_node* right);
 
 /* TODO: docs */ 
 

@@ -3,28 +3,29 @@ G       ::= DEFS '\0'
 DEFS    ::= DEF [DEFS]
 DEF     ::= NVAR | NFUN
 NVAR    ::= "var" NAME ["=" OP] ';'
-NFUN    ::= "fun" NAME (ARG) BLOCK
-ARG     ::= ["var" NAME ARG]
-BLOCK   ::= ['{' {STMT} '}']
-STMT    ::= BLOCK | ASS | NVAR | IF | WHILE | RET
+NFUN    ::= "fun" NAME ([ARG]) BLOCK
+ARG     ::= "var" NAME [',' ARG]
+BLOCK   ::= '{' SEQ '}'
+SEQ     ::= STMT [SEQ]
+STMT    ::= BLOCK | ASS | NVAR | IF | WHILE | RET | (CALL ';')
 ASS     ::= NAME "<-" OP ';'
 IF      ::= "if" '(' LOGIC ')' BRANCH
 BRANCH  ::= STMT ["else" STMT]
 WHILE   ::= "while" '(' LOGIC ')' STMT
 RET     ::= "return" OP ';'
 
-LOGIC   ::= OR
-OR      ::= AND {'||' AND}
+LOGIC   ::= AND {'||' AND}
 AND     ::= NOT {'&&' NOT}
 NOT     ::= CMP | '!' NOT
-CMP     ::= SUM CMP_OP SUM
+CMP     ::= OP {CMP_OP OP}
 CMP_OP  ::= '>' | '<' | "<=" | ">=" | "==" | "!="
-SUM     ::= TERM [('+' | '-') SUM]
+OP      ::= TERM [('+' | '-') OP]
 TERM    ::= UNARY [('*' | '/') TERM]
-UNARY   ::= '-' UNARY | ATOM
+UNARY   ::= '-' GROUP | ATOM
+GROUP   ::= '(' EXPR ')' | ATOM
 ATOM    ::= NUM | VAR | CALL
-CALL    ::= NAME '(' PAR ')'
-PAR     ::= [OP ',' PAR]
+CALL    ::= NAME '(' [PAR] ')'
+PAR     ::= OP [',' PAR]
 VAR     ::= NAME
 
 NAME    ::= <'a-zA-Z0-9_'> {<'a-zA-Z0-9_'>}

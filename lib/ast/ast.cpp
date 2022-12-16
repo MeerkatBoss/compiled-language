@@ -6,33 +6,32 @@
 
 #include "ast.h"
 
-ast_node* make_node(node_type type, node_value val, ast_node* parent)
+ast_node *make_node(node_type type, node_value val, ast_node *left, ast_node *right)
 {
     ast_node* node = (ast_node*)calloc(1, sizeof(*node));
     *node = {
         .type = type,
         .value = val,
-        .parent = parent,
-        .left = NULL,
-        .right = NULL
+        .parent = NULL,
+        .left = left,
+        .right = right
     };
+
+    if (left)  left ->parent = node;
+    if (right) right->parent = node;
 
     return node;
 }
 
-ast_node* copy_subtree(ast_node * node)
+ast_node *copy_subtree(ast_node *node)
 {
     if (!node) return NULL;
 
-    ast_node* res = make_node(node->type, node->value);
-
-    res->left  = copy_subtree(node->left);
-    res->right = copy_subtree(node->right);
-
-    if (res-> left) res-> left->parent = res;
-    if (res->right) res->right->parent = res;
-
-    return res;
+    return make_node(
+                node->type,
+                node->value,
+                copy_subtree(node->left),
+                copy_subtree(node->right));
 }
 
 void delete_node(ast_node* node)
@@ -254,7 +253,7 @@ static ast_node *node_read(FILE *input)
 
     node_type type = read_type(input);
     LOG_ASSERT((int)type != -1, return NULL);
-    ast_node* node = make_node(type, {});
+    ast_node* node = make_node(type, {}, NULL, NULL);
 
     LOG_ASSERT_ERROR(fscanf(input, " %c", &c) == 1 && c == ',', return NULL,
         "Invalid tree file format", NULL);
