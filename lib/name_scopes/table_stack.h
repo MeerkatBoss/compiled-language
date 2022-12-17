@@ -40,12 +40,12 @@ void table_stack_add_table(table_stack* tb_stack);
 /**
  * @brief Add variable to the innermost name scope
  * @param[inout] tb_stack Scope stack
- * @param[in] var_name Variable name
+ * @param[in] name Variable name
  * @param[out] addr Variable address (offset for local variables, absolute address for globals)
  * @return Variable label name upon success, `NULL` if variable with this name has already
  * been defined in the innermost scope
  */
-const char* table_stack_add_var(table_stack* tb_stack, const char* var_name, size_t* addr);
+const char* table_stack_add_var(table_stack* tb_stack, const char* name, size_t* addr);
 
 /**
  * @brief Remove innermost name scope from stack
@@ -56,10 +56,10 @@ inline void table_stack_pop_table(table_stack* tb_stack) { array_pop(&tb_stack->
 /**
  * @brief Find variable with given name across scopes
  * @param[in] table_stack Scope stack
- * @param[in] var_name Variable name
+ * @param[in] name Variable name
  * @param[out] is_global `true` if variable has been defined in global scope, `false` otherwise
  * @return Variable label name upon success, `NULL` if variable with given name was not found
  */
-const char* table_stack_find_var(const table_stack* tb_stack, const char* var_name, bool* is_global);
+const char* table_stack_find_var(const table_stack* tb_stack, const char* name, bool* is_global);
 
 #endif

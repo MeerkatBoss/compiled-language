@@ -171,6 +171,9 @@ void tree_print(const abstract_syntax_tree* tree, FILE* output);
 // TODO: docs
 void tree_read(abstract_syntax_tree* tree,  FILE* input);
 
+// TODO: docs, implementation
+bool tree_check(const abstract_syntax_tree* tree);
+
 /**
  * @brief Get iterator to first tree element
  * 

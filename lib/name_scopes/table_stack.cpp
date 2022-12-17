@@ -45,24 +45,24 @@ void table_stack_add_table(table_stack *tb_stack)
     array_push(&tb_stack->tables, added);
 }
 
-static size_t var_table_find(var_table* table, const char *var_name);
+static size_t var_table_find(var_table* table, const char *name);
 
-const char *table_stack_add_var(table_stack *tb_stack, const char *var_name, size_t *addr)
+const char *table_stack_add_var(table_stack *tb_stack, const char *name, size_t *addr)
 {
     static const char LABEL_FORMAT[] = ".%s.var_0x%zX";
 
-    LOG_ASSERT(tb_stack->tables.size > 0, return);
+    LOG_ASSERT(tb_stack->tables.size > 0, return NULL);
 
     var_table* last_table = array_back(&tb_stack->tables);
     
-    if (var_table_find(last_table, var_name) < last_table->vars.size) /* Variable already exists*/
+    if (var_table_find(last_table, name) < last_table->vars.size) /* Variable already exists*/
         return NULL;
 
-    int label_len = snprintf(NULL, 0, LABEL_FORMAT, var_name, tb_stack->var_cnt);
+    int label_len = snprintf(NULL, 0, LABEL_FORMAT, name, tb_stack->var_cnt);
 
     char* label = (char*) calloc(label_len + 1, sizeof(*label));
 
-    sprintf(label, LABEL_FORMAT, var_name, tb_stack->var_cnt);
+    sprintf(label, LABEL_FORMAT, name, tb_stack->var_cnt);
 
     array_push(&last_table->vars, label);
     tb_stack->var_cnt++;
@@ -71,12 +71,12 @@ const char *table_stack_add_var(table_stack *tb_stack, const char *var_name, siz
     return label;
 }
 
-const char *table_stack_find_var(const table_stack *tb_stack, const char *var_name, bool *is_global)
+const char *table_stack_find_var(const table_stack *tb_stack, const char *name, bool *is_global)
 {
     for (size_t i = tb_stack->tables.size; i > 0; i--)
     {
         var_table* cur_table = array_get_element(&tb_stack->tables, i - 1);
-        size_t index = var_table_find(cur_table, var_name);
+        size_t index = var_table_find(cur_table, name);
         if (index < cur_table->vars.size)
         {
             *is_global = cur_table->is_global;
@@ -87,13 +87,13 @@ const char *table_stack_find_var(const table_stack *tb_stack, const char *var_na
     return NULL;
 }
 
-static size_t var_table_find(var_table *table, const char *var_name)
+static size_t var_table_find(var_table *table, const char *name)
 {
     for (size_t i = 0; i < table->vars.size; i++)
     {
-        size_t len = strlen(var_name);
+        size_t len = strlen(name);
         const char* cur_name = *array_get_element(&table->vars, i);
-        if (strncmp(cur_name + 1, var_name, len) == 0 && cur_name[len + 1] == '.')
+        if (strncmp(cur_name + 1, name, len) == 0 && cur_name[len + 1] == '.')
             return i;
     }
     return table->vars.size;

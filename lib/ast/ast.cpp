@@ -94,6 +94,30 @@ void tree_read(abstract_syntax_tree *tree, FILE *input)
     tree->root = node_read(input);
 }
 
+static bool check_node(const ast_node* node);
+static inline bool check_type(const ast_node* node, node_type type) { return node && node->type == type; }
+static inline const char* node_str(const ast_node* node)
+{
+    if (!node) return "empty node";
+
+    switch (node->type)
+    {
+    #define NODE_TYPE(name, ...) case NODE_##name: return #name;
+    #include "node_types.h"
+    #undef NODE_TYPE
+    default: return "[[UNKNOWN]]";
+    }
+    LOG_ASSERT(0 && "Unreachable code", return NULL);
+}
+#define AST_ASSERT_WITH_CLEANUP(condition, cleanup, format, ...) \
+    LOG_ASSERT_ERROR(condition, { cleanup; return false; }, "Malformed AST:" format, __VA_ARGS__)
+#define AST_ASSERT(condition, format, ...) AST_ASSERT_WITH_CLEANUP(condition, {}, format, __VA_ARGS__)
+
+bool tree_check(const abstract_syntax_tree *tree)
+{
+    return check_node(tree->root);
+}
+
 tree_iterator tree_begin(abstract_syntax_tree *tree)
 {
     LOG_ASSERT(tree != NULL, return NULL);
@@ -471,4 +495,57 @@ logic_type read_logic(FILE *input)
 
     log_message(MSG_ERROR, "Unknown comparison operation type: %s", BUFFER);
     return (logic_type)-1;
+}
+
+// TODO: implementation
+static bool check_node(const ast_node *node)
+{
+    return true;
+// #define LEFT node->left
+// #define RIGHT node->right
+// #define CHECK_LEFT(type) check_type(LEFT, NODE_##type)
+// #define CHECK_RIGHT(type) check_type(RIGHT, NODE_##type)
+// #define CHECK_STMT(child) CHECK_##child(BLOCK) || CHECK_##child(NVAR) || CHECK_##child(ASS) || CHECK_##child(IF)\
+//                             || CHECK_##child(WHILE) || CHECK_##child(RET) || CHECK_##child(CALL)
+// #define CHECK_EXPR(child) CHECK_##child(OP) || CHECK_##child(CONST) || CHECK_##child(VAR) || CHECK_##child(CALL)
+
+//     if (!node) return true;
+
+//     switch (node->type)
+//     {
+//     case NODE_DEFS:
+//         AST_ASSERT(CHECK_LEFT(NVAR) || CHECK_LEFT(NFUN),
+//             "Expected NVAR or NFUN, got empty node.", NULL);
+//         AST_ASSERT(!LEFT || CHECK_RIGHT(DEFS),
+//             "Expected DEFS or empty node, got %s", node_str(RIGHT));
+//         break;
+//     case NODE_NVAR:
+//         AST_ASSERT(!LEFT,
+//             "Expected empty node, got %s", node_str(LEFT));
+//         AST_ASSERT(CHECK_EXPR(RIGHT), "Expected expression node, got %s", node_str(RIGHT));
+//         break;
+//     case NODE_NFUN:
+//         AST_ASSERT(!LEFT || CHECK_LEFT(ARG), "Expected ARG or empty node, got %s", node_str(LEFT));
+//         AST_ASSERT(CHECK_RIGHT(BLOCK), "Expected BLOCK, got %s", node_str(RIGHT));
+//         break;
+//     case NODE_OP:
+//         if (node->value.op == OP_NEG || node->value.op == OP_NOT)
+//             AST_ASSERT(!LEFT, "Expected empty node, got %s", node_str(LEFT));
+//         else
+//             AST_ASSERT(CHECK_EXPR(LEFT), "Expected expression, got %s", node_str(LEFT));
+//         AST_ASSERT(CHECK_EXPR(RIGHT), "Expected expression, got %s", node_str(RIGHT));
+//         break;
+//     case NODE_ARG:
+//         AST_ASSERT(!LEFT, "Expected empty node, got %s", node_str(LEFT));
+//         AST_ASSERT(!RIGHT || CHECK_RIGHT(ARG), "Expected ARG or empty node, got %s", node_str(RIGHT));
+//         break;
+//     }
+
+//     return true;
+// #undef LEFT
+// #undef RIGHT
+// #undef CHECK_LEFT
+// #undef CHECK_RIGHT
+// #undef CHECK_STMT
+// #undef CHECK_EXPR
 }

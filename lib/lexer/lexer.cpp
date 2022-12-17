@@ -25,7 +25,7 @@ int parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) *
 
     while (current_pos.offset <= str_length)
     {
-        char cur_c = str[current_pos.offset];
+        unsigned char cur_c = str[current_pos.offset];
         file_pos lst_pos = current_pos;
 
         if (cur_c == '\n' || current_pos.offset == 0)
