@@ -1,0 +1,86 @@
+{
+  DEFS,
+  NULL,
+  {
+    NFUN,
+    main,
+    {},
+    {
+      BLOCK,
+      NULL,
+      {},
+      {
+        SEQ,
+        NULL,
+        {
+          NVAR,
+          x,
+          {},
+          { CONST, 1.000, {}, {} }
+        },
+        {
+          SEQ,
+          NULL,
+          {
+            NVAR,
+            y,
+            {},
+            {
+              OP,
+              MUL,
+              { VAR, x, {}, {} },
+              { CONST, 8.000, {}, {} }
+            }
+          },
+          {
+            SEQ,
+            NULL,
+            {
+              ASS,
+              x,
+              {},
+              {
+                OP,
+                SUB,
+                { VAR, y, {}, {} },
+                { CONST, 2.000, {}, {} }
+              }
+            },
+            {
+              SEQ,
+              NULL,
+              {
+                CALL,
+                print,
+                {},
+                {
+                  PAR,
+                  NULL,
+                  {
+                    OP,
+                    ADD,
+                    { VAR, x, {}, {} },
+                    { VAR, y, {}, {} }
+                  },
+                  {}
+                }
+              },
+              {
+                SEQ,
+                NULL,
+                {
+                  RET,
+                  NULL,
+                  {},
+                  { CONST, 0.000, {}, {} }
+                },
+                {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {}
+}

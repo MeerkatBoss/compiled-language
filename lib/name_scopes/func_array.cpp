@@ -49,4 +49,5 @@ const function *func_array_find_func(const func_array *functions, const char *na
     for (size_t i = 0; i < functions->size; i++)
         if (strcmp(name, functions->data[i].name) == 0)
             return &functions->data[i];
+    return NULL;
 }

@@ -10,7 +10,7 @@ int main()
     add_default_file_logger();
     add_logger({
         .name = "Console logger",
-        .stream = stdout,
+        .stream = stderr,
         .logging_level = LOG_ERROR,
         .settings_mask = LGS_USE_ESCAPE | LGS_KEEP_OPEN
     });
@@ -43,12 +43,14 @@ int main()
 
     abstract_syntax_tree tree = {};
     parser_build_tree(&tokens, &tree);
-    tree_print(&tree, stdout);
-    putc('\n', stdout);
+    FILE* output = fopen("ast.tree", "w+");
+    tree_print(&tree, output);
+    putc('\n', output);
 
     tree_dtor(&tree);
     lexer_tree_dtor(&lex_tree);
     array_dtor(&tokens);
+    fclose(output);
 
     return 0;
 }

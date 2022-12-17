@@ -68,6 +68,8 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output, bool u
 
     for (size_t i = 0; i < state.functions.size; i++)
     {
+        if (state.functions.data[i].node == NULL)   // stdlib function
+            continue;
         STEP_WITH_CLEANUP(
             compile_node(state.functions.data[i].node, &state),
             state_destroy(&state)
@@ -75,6 +77,7 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output, bool u
         fputc('\n', output);
     }
 
+    state_destroy(&state);
     return true;
 }
 
@@ -112,17 +115,17 @@ static bool on_compiled_right   (const ast_node* node, compilation_state* state)
 
 bool compile_node(const ast_node *node, compilation_state *state)
 {
-    if (node == NULL) return 0;
+    if (node == NULL) return true;
 
     STEP(on_compiling_left(node, state));
     STEP(compile_node(node->left, state));
     STEP(on_compiled_left(node, state));
 
     STEP(on_compiling_right(node, state));
-    STEP(compile_node(node->left, state));
+    STEP(compile_node(node->right, state));
     STEP(on_compiled_right(node, state));
 
-    return 0;
+    return true;
 }
 
 #define compile(name, stage) compile_##name(node, state, STAGE_##stage)
@@ -485,7 +488,7 @@ define_compile(CALL)
     const function* func = func_array_find_func(&state->functions, node->value.name);
     AST_ASSERT(func != NULL, "Function '%s' was not defined.", node->value.name);
     size_t args = 0;
-    ast_node* arg = node->left;
+    ast_node* arg = node->right;
     while(arg)
     {
         args++;
@@ -493,7 +496,7 @@ define_compile(CALL)
     }
     AST_ASSERT(func->arg_cnt == args,
         "Function '%s' expects %zu arguments, but %zu were given.", node->value.name, func->arg_cnt, args);
-    fprintf(state->output, "\t\tcall %s", node->value.name);
+    fprintf(state->output, "\t\tcall %s\n", node->value.name);
 
     return true;
 }
@@ -508,6 +511,8 @@ define_compile(RET)
     if (stage != STAGE_COMPILED_RIGHT) return true; // Nothing to do here
 
     fprintf(state->output, "\t\tjmp .%s.end\n", state->func_name);
+    if (state->block_depth == 1)
+        state->has_return = true;
     return true;
 }
 
