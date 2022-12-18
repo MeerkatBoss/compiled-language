@@ -1,0 +1,121 @@
+{
+  DEFS,
+  NULL,
+  {
+    NFUN,
+    factorial,
+    { ARG, n, {}, {} },
+    {
+      BLOCK,
+      NULL,
+      {},
+      {
+        SEQ,
+        NULL,
+        {
+          IF,
+          NULL,
+          {
+            OP,
+            LEQ,
+            { VAR, n, {}, {} },
+            { CONST, 1.000, {}, {} }
+          },
+          {
+            BRANCH,
+            NULL,
+            {
+              RET,
+              NULL,
+              {},
+              { CONST, 1.000, {}, {} }
+            },
+            {}
+          }
+        },
+        {
+          SEQ,
+          NULL,
+          {
+            RET,
+            NULL,
+            {},
+            {
+              OP,
+              MUL,
+              {
+                CALL,
+                factorial,
+                {},
+                {
+                  PAR,
+                  NULL,
+                  {
+                    OP,
+                    SUB,
+                    { VAR, n, {}, {} },
+                    { CONST, 1.000, {}, {} }
+                  },
+                  {}
+                }
+              },
+              { VAR, n, {}, {} }
+            }
+          },
+          {}
+        }
+      }
+    }
+  },
+  {
+    DEFS,
+    NULL,
+    {
+      NFUN,
+      main,
+      {},
+      {
+        BLOCK,
+        NULL,
+        {},
+        {
+          SEQ,
+          NULL,
+          {
+            CALL,
+            print,
+            {},
+            {
+              PAR,
+              NULL,
+              {
+                CALL,
+                factorial,
+                {},
+                {
+                  PAR,
+                  NULL,
+                  { CALL, read, {}, {} },
+                  {}
+                }
+              },
+              {}
+            }
+          },
+          {
+            SEQ,
+            NULL,
+            {
+              RET,
+              NULL,
+              {},
+              { CONST, 0.000, {}, {} }
+            },
+            {}
+          }
+        }
+      }
+    },
+    {}
+  }
+}

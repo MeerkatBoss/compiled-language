@@ -5,6 +5,6 @@
 #include "token_list.h"
 
 // TODO: docs
-int parse_tokens(const char* str, const lexer_tree* tree, dynamic_array(token)* tokens);
+bool parse_tokens(const char* str, const lexer_tree* tree, dynamic_array(token)* tokens);
 
 #endif

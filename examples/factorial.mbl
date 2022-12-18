@@ -1,0 +1,11 @@
+fu n factorial(var n 0
+[
+    eef ( n <= 1 0 riturn 1'
+    riturn factorial( n - 1 0 8 n'
+}
+
+fu n main(0
+[
+    print(factorial(read( 0 0 0'
+    riturn 0.0'
+}

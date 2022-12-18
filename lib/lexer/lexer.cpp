@@ -12,7 +12,7 @@ struct file_pos
 };
 
 
-int parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) * tokens)
+bool parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) * tokens)
 {
     const lexer_node* cur_node = tree->root;
 
@@ -84,14 +84,14 @@ int parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) *
             continue;
         }
 
-        size_t len = current_pos.offset - token_pos.offset;
+        size_t len = current_pos.offset - token_pos.offset + 1;
 
-        LOG_ASSERT_ERROR(0, return -1,
+        LOG_ASSERT_ERROR(0, return false,
             "Invalid token '%.*s' at line %zu column %zu",
-            str + token_pos.offset, (int)len, token_pos.line, token_pos.column);
+            (int)len, str + token_pos.offset, token_pos.line, token_pos.column);
     }
 
     array_push(tokens, make_token(strdup(""), TOK_EOF, current_pos.line, current_pos.column));
 
-    return 0;
+    return true;
 }

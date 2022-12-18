@@ -1,0 +1,16 @@
+fu n main(0
+[
+   set_pixel(-0.02, 0.05, 1 0'
+   set_pixel( 0.02, 0.05, 1 0'
+   set_pixel(-0.04, 0.0, 1 0'
+   set_pixel(-0.02, 0.0, 1 0'
+   set_pixel( 0.00, 0.0, 1 0'
+   set_pixel( 0.02, 0.0, 1 0'
+   set_pixel( 0.04, 0.0, 1 0'
+   set_pixel(-0.02, -0.05, 1 0'
+   set_pixel( 0.00, -0.05, 1 0'
+   set_pixel( 0.02, -0.05, 1 0'
+   set_pixel(0.0, -0.1, 1 0'
+   flush(0'
+   riturn 0.0'
+}

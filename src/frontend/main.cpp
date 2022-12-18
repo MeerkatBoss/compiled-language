@@ -1,11 +1,14 @@
 #include <stdio.h>
 
 #include "logger.h"
-#include "lexer.h"
-#include "parser.h"
-#include "ast.h"
+#include "argparser.h"
 
-int main()
+#include "front_flags.h"
+#include "front_utils.h"
+
+#define STEP(action, cleanup) LOG_ASSERT(action, { cleanup; return 1;})
+
+int main(int argc, char** argv)
 {
     add_default_file_logger();
     add_logger({
@@ -15,49 +18,33 @@ int main()
         .settings_mask = LGS_USE_ESCAPE | LGS_KEEP_OPEN
     });
 
+    arg_state state = {};
+    STEP(
+        parse_args(argc, argv, &ARG_INFO, &state),
+        {}
+    );
+
+    if (state.help_shown) return 0;
+
     dynamic_array(token) tokens = {};
     array_ctor(&tokens);
-
-    lexer_tree lex_tree = {};
-    lexer_tree_ctor(&lex_tree);
-
-    #define LEXEME(name, str, ...) lexer_tree_add_word(&lex_tree, str, TOK_##name);
-    #include "lexemes.h"
-    #undef LEXEME
-    lexer_tree_add_numbers(&lex_tree);
-    lexer_tree_add_names(&lex_tree);
-
-    parse_tokens(
-        "fu n main(0\n"
-        "[\n"
-        "   set_pixel(-0.02, 0.05, 1 0'\n"
-        "   set_pixel( 0.02, 0.05, 1 0'\n"
-        "   set_pixel(-0.04, 0.0, 1 0'\n"
-        "   set_pixel(-0.02, 0.0, 1 0'\n"
-        "   set_pixel( 0.00, 0.0, 1 0'\n"
-        "   set_pixel( 0.02, 0.0, 1 0'\n"
-        "   set_pixel( 0.04, 0.0, 1 0'\n"
-        "   set_pixel(-0.02, -0.05, 1 0'\n"
-        "   set_pixel( 0.00, -0.05, 1 0'\n"
-        "   set_pixel( 0.02, -0.05, 1 0'\n"
-        "   set_pixel(0.0, -0.1, 1 0'\n"
-        "   flush(0'"
-        "   riturn 0.0'"
-        "}\n",
-    &lex_tree, &tokens);
-
-    // token_array_print(&tokens, stdout);
-
     abstract_syntax_tree tree = {};
-    parser_build_tree(&tokens, &tree);
-    FILE* output = fopen("ast.tree", "w+");
-    tree_print(&tree, output);
-    putc('\n', output);
+
+    STEP(
+        get_lexemes_from_file(state.input_filename, &tokens, state.show_tokens),
+        { tree_dtor(&tree); array_dtor(&tokens); }
+    );
+    STEP(
+        get_tree_from_lexemes(&tokens, &tree),
+        { tree_dtor(&tree); array_dtor(&tokens); }
+    );
+    STEP(
+        save_tree_to_file(&tree, state.output_filename),
+        { tree_dtor(&tree); array_dtor(&tokens); }
+    );
 
     tree_dtor(&tree);
-    lexer_tree_dtor(&lex_tree);
     array_dtor(&tokens);
-    fclose(output);
 
     return 0;
 }
