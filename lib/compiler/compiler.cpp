@@ -438,20 +438,16 @@ define_compile(IF)
     switch (stage)
     {
     case STAGE_COMPILING_LEFT:
-        fprintf(state->output, "\t\t; Start of .if_%s_0x%zX:\n", state->func_name, state->control_flow_cnt);
+        fprintf(state->output, "; Start of .if_%s_0x%zX\n", state->func_name, state->control_flow_cnt);
         return true;
     case STAGE_COMPILED_LEFT:
-        fputs("\t\tpush 0", state->output);
-        fprintf(state->output, "\t\t je .if_%s_0x%zX_false\n\n", state->func_name, state->control_flow_cnt);
+        fputs("\t\tpush 0\n", state->output);
+        fprintf(state->output, "\t\tje .if_%s_0x%zX_false\n\n", state->func_name, state->control_flow_cnt);
         return true;
     case STAGE_COMPILING_RIGHT:
-        array_push(&state->control_flow_stack, state->control_flow_cnt);
-        state->control_flow_cnt++;
         return true;
     case STAGE_COMPILED_RIGHT:
         fprintf(state->output, ".if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cnt);
-        state->control_flow_cnt = *array_back(&state->control_flow_stack);
-        array_pop(&state->control_flow_stack);
         return true;
     default:
         LOG_ASSERT(0 && "Unreachable code", return false);
@@ -465,15 +461,25 @@ define_compile(BRANCH)
 {
     switch (stage)
     {
+    case STAGE_COMPILING_LEFT:
+        array_push(&state->control_flow_stack, state->control_flow_cnt);
+        state->control_flow_cnt++;
+        return true;
     case STAGE_COMPILED_LEFT:
-        fprintf(state->output, "jmp .if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cnt);
+        state->control_flow_cnt = *array_back(&state->control_flow_stack);
+        array_pop(&state->control_flow_stack);
+        if (node->right != NULL)    // skip over non-empty 'else' branch
+            fprintf(state->output, "jmp .if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cnt);
         return true;
     case STAGE_COMPILING_RIGHT:
         fprintf(state->output, ".if_%s_0x%zX_false:\n", state->func_name, state->control_flow_cnt);
+        array_push(&state->control_flow_stack, state->control_flow_cnt);
+        state->control_flow_cnt++;
         return true;
-    case STAGE_COMPILING_LEFT:
     case STAGE_COMPILED_RIGHT:
-        return true;    // Nothing to do here
+        state->control_flow_cnt = *array_back(&state->control_flow_stack);
+        array_pop(&state->control_flow_stack);
+        return true;
     default:
         LOG_ASSERT(0 && "Unreachable code", return false);
         return false;

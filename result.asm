@@ -3,6 +3,50 @@
 		halt		; Stop program execution
 
 
+factorial:
+		push rbp
+		pop [rsp]
+		push rsp
+		inc
+		dup
+		pop rsp
+		pop rbp
+%def .n.var_0x0 0
+		push rsp
+		inc
+		pop rsp
+		pop [rbp+.n.var_0x0]
+; Start of .if_factorial_0x0
+		push [rbp+.n.var_0x0]
+		push 1000
+		call __op.leq
+		push 0
+		je .if_factorial_0x0_false
+
+		push 1000
+		jmp .factorial.end
+.if_factorial_0x0_false:
+.if_factorial_0x0_end:
+
+		push [rbp+.n.var_0x0]
+		push 1000
+		sub
+		call factorial
+		push [rbp+.n.var_0x0]
+		mul
+		push 1000
+		div
+		jmp .factorial.end
+.factorial.end:
+		push rbp
+		dec
+		dup
+		pop rbp
+		pop rsp
+		push [rbp]
+		pop rbp
+		ret
+
 main:
 		push rbp
 		pop [rsp]
@@ -11,21 +55,14 @@ main:
 		dup
 		pop rsp
 		pop rbp
-%def .x.var_0x0 0
+%def .x.var_0x1 0
 		push rsp
 		inc
 		pop rsp
 		call read
-		pop [rbp+.x.var_0x0]
-%def .y.var_0x1 1
-		push rsp
-		inc
-		pop rsp
-		call read
-		pop [rbp+.y.var_0x1]
-		push [rbp+.x.var_0x0]
-		push [rbp+.y.var_0x1]
-		add
+		pop [rbp+.x.var_0x1]
+		push [rbp+.x.var_0x1]
+		call factorial
 		call print
 		pop rdx		; Discard function call result.
 		push 0

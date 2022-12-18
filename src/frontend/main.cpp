@@ -28,17 +28,20 @@ int main()
     lexer_tree_add_names(&lex_tree);
 
     parse_tokens(
+        "fu n factorial(var n 0\n"
+        "[\n"
+        "   eef (n <= 1 0 riturn 1'\n"
+        "   riturn factorial(n - 1 0 8 n'\n"
+        "}\n"
         "fu n main(0\n"
         "[\n"
         "   var x := read(0'\n"
-        "   var y := read(0'\n"
-        "   print(x + y 0'\n"
+        "   print( factorial(x 0 0'\n"
         "   riturn 0.0'"
         "}\n",
     &lex_tree, &tokens);
 
-    token_array_print(&tokens, stdout);
-
+    // token_array_print(&tokens, stdout);
 
     abstract_syntax_tree tree = {};
     parser_build_tree(&tokens, &tree);
