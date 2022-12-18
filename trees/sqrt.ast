@@ -1,0 +1,51 @@
+{
+  DEFS,
+  NULL,
+  {
+    NFUN,
+    main,
+    {},
+    {
+      BLOCK,
+      NULL,
+      {},
+      {
+        SEQ,
+        NULL,
+        {
+          CALL,
+          print,
+          {},
+          {
+            PAR,
+            NULL,
+            {
+              CALL,
+              sqrt,
+              {},
+              {
+                PAR,
+                NULL,
+                { CALL, read, {}, {} },
+                {}
+              }
+            },
+            {}
+          }
+        },
+        {
+          SEQ,
+          NULL,
+          {
+            RET,
+            NULL,
+            {},
+            { CONST, 0.000, {}, {} }
+          },
+          {}
+        }
+      }
+    }
+  },
+  {}
+}

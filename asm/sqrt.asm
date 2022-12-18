@@ -1,3 +1,99 @@
+		call main	; Program entry point
+		pop rdx		; Ignore return status
+		halt		; Stop program execution
+
+
+main:
+		push rbp
+		pop [rsp]
+		push rsp
+		inc
+		dup
+		pop rsp
+		pop rbp
+		call read
+		call sqrt
+		call print
+		pop rdx		; Discard function call result.
+		push 0
+		jmp .main.end
+.main.end:
+		push rbp
+		dec
+		dup
+		pop rbp
+		pop rsp
+		push [rbp]
+		pop rbp
+		ret
+
+; __cmp_op.asm
+
+__op.lt:	jl __op.lt.true
+		push 0
+		ret
+__op.lt.true:	push 1000
+		ret
+
+__op.gt:	jg __op.gt.true
+		push 0
+		ret
+__op.gt.true:	push 1000
+		ret
+
+__op.leq:	jle __op.leq.true
+		push 0
+		ret
+__op.leq.true:	push 1000
+		ret
+
+__op.geq:	jge __op.geq.true
+		push 0
+		ret
+__op.geq.true:	push 1000
+		ret
+
+__op.eq:	je __op.eq.true
+		push 0
+		ret
+__op.eq.true:	push 1000
+		ret
+
+__op.neq:	jne __op.neq.true
+		push 0
+		ret
+__op.neq.true:	push 1000
+		ret
+		
+; __logic_op.asm
+
+__op.and:	mul
+		push 0
+		jne __op.and.true
+		push 0
+		ret
+__op.and.true:	push 1000
+		ret
+
+__op.or:	push 0
+		je __op.or.second
+		pop rdx
+		push 1000
+		ret
+__op.or.second:	push 0
+		je __op.or.false
+		push 1000
+		ret
+__op.or.false:	push 0
+		ret
+
+__op.not:	push 0
+		je __op.not.true
+		push 0
+		ret
+__op.not.true:	push 1000
+		ret
+		
 ; stdlib.asm
 
 
