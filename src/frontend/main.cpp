@@ -28,15 +28,20 @@ int main()
     lexer_tree_add_names(&lex_tree);
 
     parse_tokens(
-        "fu n factorial(var n 0\n"
-        "[\n"
-        "   eef (n <= 1 0 riturn 1'\n"
-        "   riturn factorial(n - 1 0 8 n'\n"
-        "}\n"
         "fu n main(0\n"
         "[\n"
-        "   var x := read(0'\n"
-        "   print( factorial(x 0 0'\n"
+        "   set_pixel(-0.02, 0.05, 1 0'\n"
+        "   set_pixel( 0.02, 0.05, 1 0'\n"
+        "   set_pixel(-0.04, 0.0, 1 0'\n"
+        "   set_pixel(-0.02, 0.0, 1 0'\n"
+        "   set_pixel( 0.00, 0.0, 1 0'\n"
+        "   set_pixel( 0.02, 0.0, 1 0'\n"
+        "   set_pixel( 0.04, 0.0, 1 0'\n"
+        "   set_pixel(-0.02, -0.05, 1 0'\n"
+        "   set_pixel( 0.00, -0.05, 1 0'\n"
+        "   set_pixel( 0.02, -0.05, 1 0'\n"
+        "   set_pixel(0.0, -0.1, 1 0'\n"
+        "   flush(0'"
         "   riturn 0.0'"
         "}\n",
     &lex_tree, &tokens);

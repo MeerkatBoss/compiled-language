@@ -38,13 +38,15 @@ set_pixel:	push rax
 		div
 		pop rdx			; rdx = ch / 1000
 
+		push -1
+		mul
 		push vbuf.height
 		mul
 		push 2000
 		div
 		push vbuf.y0
 		add
-		pop rbx			; rbx = (y * h)/2000 + y0
+		pop rbx			; rbx = (-y * h)/2000 + y0
 
 		push vbuf.width
 		mul

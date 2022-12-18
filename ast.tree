@@ -1,0 +1,346 @@
+{
+  DEFS,
+  NULL,
+  {
+    NFUN,
+    main,
+    {},
+    {
+      BLOCK,
+      NULL,
+      {},
+      {
+        SEQ,
+        NULL,
+        {
+          CALL,
+          set_pixel,
+          {},
+          {
+            PAR,
+            NULL,
+            {
+              OP,
+              NEG,
+              {},
+              { CONST, 0.020, {}, {} }
+            },
+            {
+              PAR,
+              NULL,
+              { CONST, 0.050, {}, {} },
+              {
+                PAR,
+                NULL,
+                { CONST, 1.000, {}, {} },
+                {}
+              }
+            }
+          }
+        },
+        {
+          SEQ,
+          NULL,
+          {
+            CALL,
+            set_pixel,
+            {},
+            {
+              PAR,
+              NULL,
+              { CONST, 0.020, {}, {} },
+              {
+                PAR,
+                NULL,
+                { CONST, 0.050, {}, {} },
+                {
+                  PAR,
+                  NULL,
+                  { CONST, 1.000, {}, {} },
+                  {}
+                }
+              }
+            }
+          },
+          {
+            SEQ,
+            NULL,
+            {
+              CALL,
+              set_pixel,
+              {},
+              {
+                PAR,
+                NULL,
+                {
+                  OP,
+                  NEG,
+                  {},
+                  { CONST, 0.040, {}, {} }
+                },
+                {
+                  PAR,
+                  NULL,
+                  { CONST, 0.000, {}, {} },
+                  {
+                    PAR,
+                    NULL,
+                    { CONST, 1.000, {}, {} },
+                    {}
+                  }
+                }
+              }
+            },
+            {
+              SEQ,
+              NULL,
+              {
+                CALL,
+                set_pixel,
+                {},
+                {
+                  PAR,
+                  NULL,
+                  {
+                    OP,
+                    NEG,
+                    {},
+                    { CONST, 0.020, {}, {} }
+                  },
+                  {
+                    PAR,
+                    NULL,
+                    { CONST, 0.000, {}, {} },
+                    {
+                      PAR,
+                      NULL,
+                      { CONST, 1.000, {}, {} },
+                      {}
+                    }
+                  }
+                }
+              },
+              {
+                SEQ,
+                NULL,
+                {
+                  CALL,
+                  set_pixel,
+                  {},
+                  {
+                    PAR,
+                    NULL,
+                    { CONST, 0.000, {}, {} },
+                    {
+                      PAR,
+                      NULL,
+                      { CONST, 0.000, {}, {} },
+                      {
+                        PAR,
+                        NULL,
+                        { CONST, 1.000, {}, {} },
+                        {}
+                      }
+                    }
+                  }
+                },
+                {
+                  SEQ,
+                  NULL,
+                  {
+                    CALL,
+                    set_pixel,
+                    {},
+                    {
+                      PAR,
+                      NULL,
+                      { CONST, 0.020, {}, {} },
+                      {
+                        PAR,
+                        NULL,
+                        { CONST, 0.000, {}, {} },
+                        {
+                          PAR,
+                          NULL,
+                          { CONST, 1.000, {}, {} },
+                          {}
+                        }
+                      }
+                    }
+                  },
+                  {
+                    SEQ,
+                    NULL,
+                    {
+                      CALL,
+                      set_pixel,
+                      {},
+                      {
+                        PAR,
+                        NULL,
+                        { CONST, 0.040, {}, {} },
+                        {
+                          PAR,
+                          NULL,
+                          { CONST, 0.000, {}, {} },
+                          {
+                            PAR,
+                            NULL,
+                            { CONST, 1.000, {}, {} },
+                            {}
+                          }
+                        }
+                      }
+                    },
+                    {
+                      SEQ,
+                      NULL,
+                      {
+                        CALL,
+                        set_pixel,
+                        {},
+                        {
+                          PAR,
+                          NULL,
+                          {
+                            OP,
+                            NEG,
+                            {},
+                            { CONST, 0.020, {}, {} }
+                          },
+                          {
+                            PAR,
+                            NULL,
+                            {
+                              OP,
+                              NEG,
+                              {},
+                              { CONST, 0.050, {}, {} }
+                            },
+                            {
+                              PAR,
+                              NULL,
+                              { CONST, 1.000, {}, {} },
+                              {}
+                            }
+                          }
+                        }
+                      },
+                      {
+                        SEQ,
+                        NULL,
+                        {
+                          CALL,
+                          set_pixel,
+                          {},
+                          {
+                            PAR,
+                            NULL,
+                            { CONST, 0.000, {}, {} },
+                            {
+                              PAR,
+                              NULL,
+                              {
+                                OP,
+                                NEG,
+                                {},
+                                { CONST, 0.050, {}, {} }
+                              },
+                              {
+                                PAR,
+                                NULL,
+                                { CONST, 1.000, {}, {} },
+                                {}
+                              }
+                            }
+                          }
+                        },
+                        {
+                          SEQ,
+                          NULL,
+                          {
+                            CALL,
+                            set_pixel,
+                            {},
+                            {
+                              PAR,
+                              NULL,
+                              { CONST, 0.020, {}, {} },
+                              {
+                                PAR,
+                                NULL,
+                                {
+                                  OP,
+                                  NEG,
+                                  {},
+                                  { CONST, 0.050, {}, {} }
+                                },
+                                {
+                                  PAR,
+                                  NULL,
+                                  { CONST, 1.000, {}, {} },
+                                  {}
+                                }
+                              }
+                            }
+                          },
+                          {
+                            SEQ,
+                            NULL,
+                            {
+                              CALL,
+                              set_pixel,
+                              {},
+                              {
+                                PAR,
+                                NULL,
+                                { CONST, 0.000, {}, {} },
+                                {
+                                  PAR,
+                                  NULL,
+                                  {
+                                    OP,
+                                    NEG,
+                                    {},
+                                    { CONST, 0.100, {}, {} }
+                                  },
+                                  {
+                                    PAR,
+                                    NULL,
+                                    { CONST, 1.000, {}, {} },
+                                    {}
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              SEQ,
+                              NULL,
+                              { CALL, flush, {}, {} },
+                              {
+                                SEQ,
+                                NULL,
+                                {
+                                  RET,
+                                  NULL,
+                                  {},
+                                  { CONST, 0.000, {}, {} }
+                                },
+                                {}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {}
+}
