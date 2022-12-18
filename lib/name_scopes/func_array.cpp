@@ -17,10 +17,12 @@ void func_array_ctor(func_array *functions, bool use_stdlib)
 
     if (use_stdlib)
     {
-        array_push(functions, {.node = NULL, .name = "sqrt",      .arg_cnt = 1});
-        array_push(functions, {.node = NULL, .name = "abs",       .arg_cnt = 1});
         array_push(functions, {.node = NULL, .name = "print",     .arg_cnt = 1});
+        array_push(functions, {.node = NULL, .name = "read",      .arg_cnt = 0});
+        array_push(functions, {.node = NULL, .name = "abs",       .arg_cnt = 1});
         array_push(functions, {.node = NULL, .name = "set_pixel", .arg_cnt = 3});
+        array_push(functions, {.node = NULL, .name = "flush",     .arg_cnt = 0});
+        array_push(functions, {.node = NULL, .name = "sqrt",      .arg_cnt = 1});
     }
 }
 

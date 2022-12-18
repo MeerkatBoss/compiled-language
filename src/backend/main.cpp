@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "logger.h"
 
@@ -23,7 +24,12 @@ int main()
 
     FILE* output = fopen("result.asm", "w+");
     compiler_tree_to_asm(&tree, output, true);
+
     fclose(output);
+
+    system("cat assets/__cmp_op.asm >> result.asm");
+    system("cat assets/__logic_op.asm >> result.asm");
+    system("cat assets/stdlib.asm >> result.asm");
 
     tree_dtor(&tree);
 

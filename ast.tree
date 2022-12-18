@@ -16,7 +16,7 @@
           NVAR,
           x,
           {},
-          { CONST, 1.000, {}, {} }
+          { CALL, read, {}, {} }
         },
         {
           SEQ,
@@ -25,57 +25,37 @@
             NVAR,
             y,
             {},
-            {
-              OP,
-              MUL,
-              { VAR, x, {}, {} },
-              { CONST, 8.000, {}, {} }
-            }
+            { CALL, read, {}, {} }
           },
           {
             SEQ,
             NULL,
             {
-              ASS,
-              x,
+              CALL,
+              print,
               {},
               {
-                OP,
-                SUB,
-                { VAR, y, {}, {} },
-                { CONST, 2.000, {}, {} }
+                PAR,
+                NULL,
+                {
+                  OP,
+                  ADD,
+                  { VAR, x, {}, {} },
+                  { VAR, y, {}, {} }
+                },
+                {}
               }
             },
             {
               SEQ,
               NULL,
               {
-                CALL,
-                print,
-                {},
-                {
-                  PAR,
-                  NULL,
-                  {
-                    OP,
-                    ADD,
-                    { VAR, x, {}, {} },
-                    { VAR, y, {}, {} }
-                  },
-                  {}
-                }
-              },
-              {
-                SEQ,
+                RET,
                 NULL,
-                {
-                  RET,
-                  NULL,
-                  {},
-                  { CONST, 0.000, {}, {} }
-                },
-                {}
-              }
+                {},
+                { CONST, 0.000, {}, {} }
+              },
+              {}
             }
           }
         }

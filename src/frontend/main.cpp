@@ -30,9 +30,8 @@ int main()
     parse_tokens(
         "fu n main(0\n"
         "[\n"
-        "   var x := 1'\n"
-        "   var y := x 8 8.0'\n"
-        "   x <_ y - 2'\n"
+        "   var x := read(0'\n"
+        "   var y := read(0'\n"
         "   print(x + y 0'\n"
         "   riturn 0.0'"
         "}\n",
