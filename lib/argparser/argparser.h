@@ -62,11 +62,11 @@ struct arg_info
  * 
  * @param[in] argc Length of command-line argument vector
  * @param[in] argv Command-line arguments vector
- * @param[in] infos Command-line argument handlers
+ * @param[in] info Command-line argument handlers
  * @param[inout] params Additional parameter to pass to handlers
  * @return `true` if all arguments have been parsed, `false` otherwise
  */
-bool parse_args(int argc, const char* const* argv, const arg_info* infos, void* params);
+bool parse_args(int argc, const char* const* argv, const arg_info* info, void* params);
 
 /**
  * @brief 

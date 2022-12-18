@@ -4,7 +4,7 @@
 #include "ast.h"
 #include "token_list.h"
 
-const char DEFAULT_OUTPUT[] = "out.ast";
+const char FRONT_DEFAULT_OUTPUT[] = "out.ast";
 
 /**
  * @brief Fill array with lexemes from file

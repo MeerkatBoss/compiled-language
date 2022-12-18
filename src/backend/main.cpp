@@ -3,10 +3,12 @@
 
 #include "logger.h"
 
-#include "ast.h"
-#include "compiler.h"
+#include "back_flags.h"
+#include "back_utils.h"
 
-int main()
+#define STEP(action, cleanup) LOG_ASSERT(action, { cleanup; return 1;})
+
+int main(int argc, char** argv)
 {
     add_default_file_logger();
     add_logger({
@@ -16,20 +18,24 @@ int main()
         .settings_mask = LGS_USE_ESCAPE | LGS_KEEP_OPEN
     });
 
+    arg_state state = {};
+    STEP(
+        parse_args(argc, argv, &BACK_ARG_INFO, &state),
+        {}
+    );
+
+    if (state.help_shown) return 0;
+
     abstract_syntax_tree tree = {};
 
-    FILE* input = fopen("ast.tree", "r");
-    tree_read(&tree, input);
-    fclose(input);
-
-    FILE* output = fopen("result.asm", "w+");
-    compiler_tree_to_asm(&tree, output, true);
-
-    fclose(output);
-
-    system("cat assets/__cmp_op.asm >> result.asm");
-    system("cat assets/__logic_op.asm >> result.asm");
-    system("cat assets/stdlib.asm >> result.asm");
+    STEP(
+        get_tree_from_file(state.input_filename, &tree),
+        {}
+    );
+    STEP(
+        compile_tree_to_file(&tree, state.output_filename, !state.no_stdlib),
+        tree_dtor(&tree)
+    );
 
     tree_dtor(&tree);
 

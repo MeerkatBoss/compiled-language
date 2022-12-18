@@ -1,8 +1,8 @@
 #include "logger.h"
 
-#include "front_flags.h"
+#include "back_flags.h"
 
-int front_set_input_file(const char *const *argv, void *params)
+int back_set_input_file(const char *const *argv, void *params)
 {
     arg_state* state = (arg_state*)params;
 
@@ -14,7 +14,7 @@ int front_set_input_file(const char *const *argv, void *params)
     return 1;
 }
 
-int front_set_output_file(const char *const *argv, void *params)
+int back_set_output_file(const char *const *argv, void *params)
 {
     arg_state* state = (arg_state*)params;
 
@@ -26,24 +26,17 @@ int front_set_output_file(const char *const *argv, void *params)
     return 1;
 }
 
-int front_set_reverse(const char *const *, void *params)
+int back_set_no_stdlib(const char *const *, void *params)
 {
     arg_state* state = (arg_state*)params;
-    state->reverse = true;
+    state->no_stdlib = true;
     return 0;
 }
 
-int front_set_show_tokens(const char *const *, void *params)
+int back_show_help(const char *const *, void *params)
 {
     arg_state* state = (arg_state*)params;
-    state->show_tokens = true;
-    return 0;
-}
-
-int front_show_help(const char *const *, void *params)
-{
-    arg_state* state = (arg_state*)params;
-    print_help(&FRONT_ARG_INFO);
+    print_help(&BACK_ARG_INFO);
     state->help_shown = true;
     return 0;
 }

@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     arg_state state = {};
     STEP(
-        parse_args(argc, argv, &ARG_INFO, &state),
+        parse_args(argc, argv, &FRONT_ARG_INFO, &state),
         {}
     );
 

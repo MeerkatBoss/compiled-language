@@ -55,13 +55,7 @@ main:
 		dup
 		pop rsp
 		pop rbp
-%def .x.var_0x1 0
-		push rsp
-		inc
-		pop rsp
 		call read
-		pop [rbp+.x.var_0x1]
-		push [rbp+.x.var_0x1]
 		call factorial
 		call print
 		pop rdx		; Discard function call result.
@@ -184,13 +178,15 @@ set_pixel:	push rax
 		div
 		pop rdx			; rdx = ch / 1000
 
+		push -1
+		mul
 		push vbuf.height
 		mul
 		push 2000
 		div
 		push vbuf.y0
 		add
-		pop rbx			; rbx = (y * h)/2000 + y0
+		pop rbx			; rbx = (-y * h)/2000 + y0
 
 		push vbuf.width
 		mul

@@ -50,7 +50,7 @@ bool get_tree_from_lexemes(const dynamic_array(token) * tokens, abstract_syntax_
 bool save_tree_to_file(const abstract_syntax_tree *tree, const char *filename)
 {
     LOG_ASSERT(tree, return false);
-    if (!filename) filename = DEFAULT_OUTPUT;
+    if (!filename) filename = FRONT_DEFAULT_OUTPUT;
 
     FILE* output = fopen(filename, "w+");
     LOG_ASSERT_ERROR(output, return false,

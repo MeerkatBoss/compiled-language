@@ -4,25 +4,25 @@
 #include "argparser.h"
 #include "logger.h"
 
-static const arg_tag* find_tag(const char* str, const arg_info* infos);
+static const arg_tag* find_tag(const char* str, const arg_info* info);
 static int compare_tag(const char* str, const arg_tag* tag);
 
-bool parse_args(int argc, const char *const *argv, const arg_info *infos, void *params)
+bool parse_args(int argc, const char *const *argv, const arg_info *info, void *params)
 {
     LOG_ASSERT(argv != NULL, return false);
-    LOG_ASSERT(infos != NULL, return false);
+    LOG_ASSERT(info != NULL, return false);
 
-    if (infos->name_handler)
-        LOG_ASSERT(infos->name_handler(argv, params) == 1, return false);
+    if (info->name_handler)
+        LOG_ASSERT(info->name_handler(argv, params) == 1, return false);
     argv++;
 
     while(*argv)
     {
-        const arg_tag* tag = find_tag(*argv, infos);
+        const arg_tag* tag = find_tag(*argv, info);
 
         int parsed = 0;
         if (tag == NULL)
-            parsed = infos->plain_handler(argv, params);
+            parsed = info->plain_handler(argv, params);
         else
             parsed = tag->callback(++argv, params);
 
@@ -37,44 +37,47 @@ bool parse_args(int argc, const char *const *argv, const arg_info *infos, void *
     return true;
 }
 
-void print_help(const arg_info* infos)
+void print_help(const arg_info* info)
 {
-    puts(infos->help_message);
+    puts(info->help_message);
     putc('\n', stdout);
 
     const int FLAGS_WIDTH = 24; 
-    for (size_t i = 0; i < infos->tag_cnt; i++)
+    for (size_t i = 0; i < info->tag_cnt; i++)
     {
         int fill = FLAGS_WIDTH;
 
-        LOG_ASSERT(infos->tags[i].short_tag != '\0'
-                || infos->tags[i].long_tag != NULL, return);
+        LOG_ASSERT(info->tags[i].short_tag != '\0'
+                || info->tags[i].long_tag != NULL, return);
 
         fputs("\033[1m", stdout);
-        if (infos->tags[i].short_tag != '\0')
-            fill -= printf("-%c", infos->tags[i].short_tag);
+        if (info->tags[i].short_tag != '\0')
+            printf("-%c", info->tags[i].short_tag);
+        else
+            fputs("    ", stdout);
+        fill -= 2;
 
-        if (infos->tags[i].long_tag != NULL)
+        if (info->tags[i].long_tag != NULL)
         {
-            if (infos->tags[i].short_tag != '\0')
+            if (info->tags[i].short_tag != '\0')
             {
                 fputs(", ", stdout);
                 fill -= 2;
             }
-            fill -= printf("--%s", infos->tags[i].long_tag);
+            fill -= printf("--%s", info->tags[i].long_tag);
         }
         fputs("\033[22m", stdout);
-        printf("%*s%s\n", fill, "", infos->tags[i].description);
+        printf("%*s%s\n", fill, "", info->tags[i].description);
     }
 }
 
-static const arg_tag* find_tag(const char* str, const arg_info* infos)
+static const arg_tag* find_tag(const char* str, const arg_info* info)
 {
     LOG_ASSERT(str[0] != '\0', return NULL);
     
-    for (size_t i = 0; i < infos->tag_cnt; i++)
-        if (compare_tag(str, &infos->tags[i]))
-            return &infos->tags[i];
+    for (size_t i = 0; i < info->tag_cnt; i++)
+        if (compare_tag(str, &info->tags[i]))
+            return &info->tags[i];
 
     return NULL;
 }
