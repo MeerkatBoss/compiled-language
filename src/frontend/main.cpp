@@ -6,7 +6,10 @@
 #include "front_flags.h"
 #include "front_utils.h"
 
-#define STEP(action, cleanup) LOG_ASSERT(action, { cleanup; return 1;})
+#define STEP(action) LOG_ASSERT(action, return 1)
+
+static int regular_flow(abstract_syntax_tree* tree, dynamic_array(token)* tokens, arg_state* state);
+static int reverse_flow(abstract_syntax_tree* tree, dynamic_array(token)* tokens, arg_state* state);
 
 int main(int argc, char** argv)
 {
@@ -20,8 +23,7 @@ int main(int argc, char** argv)
 
     arg_state state = {};
     STEP(
-        parse_args(argc, argv, &FRONT_ARG_INFO, &state),
-        {}
+        parse_args(argc, argv, &FRONT_ARG_INFO, &state)
     );
 
     if (state.help_shown) return 0;
@@ -30,21 +32,43 @@ int main(int argc, char** argv)
     array_ctor(&tokens);
     abstract_syntax_tree tree = {};
 
-    STEP(
-        get_lexemes_from_file(state.input_filename, &tokens, state.show_tokens),
-        { tree_dtor(&tree); array_dtor(&tokens); }
-    );
-    STEP(
-        get_tree_from_lexemes(&tokens, &tree),
-        { tree_dtor(&tree); array_dtor(&tokens); }
-    );
-    STEP(
-        save_tree_to_file(&tree, state.output_filename),
-        { tree_dtor(&tree); array_dtor(&tokens); }
-    );
+    int status = 0;
+    if (state.reverse)
+        status = reverse_flow(&tree, &tokens, &state);
+    else
+        status = reverse_flow(&tree, &tokens, &state);
 
     tree_dtor(&tree);
     array_dtor(&tokens);
 
+    return status;
+}
+
+int regular_flow(abstract_syntax_tree *tree, dynamic_array(token) * tokens, arg_state *state)
+{
+    STEP(
+        get_lexemes_from_file(state->input_filename, tokens, state->show_tokens)
+    );
+    STEP(
+        get_tree_from_lexemes(tokens, tree)
+    );
+    STEP(
+        save_tree_to_file(tree, state->output_filename)
+    );
+
+    return 0;
+}
+
+int reverse_flow(abstract_syntax_tree *tree, dynamic_array(token) * tokens, arg_state *state)
+{
+    STEP(
+        read_tree_from_file(state->input_filename, tree)
+    );
+    STEP(
+        get_lexemes_from_tree(tree, tokens, state->show_tokens)
+    );
+    STEP(
+        make_source_file(tokens, state->output_filename)
+    );
     return 0;
 }

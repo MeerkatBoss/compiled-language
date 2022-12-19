@@ -134,25 +134,9 @@ bool compile_node(const ast_node *node, compilation_state *state)
                                 compilation_state* state __attribute__((unused)),\
                                  compilation_stage stage __attribute__((unused)))
 
-define_compile(DEFS);
-define_compile(NVAR);
-define_compile(NFUN);
-define_compile(BLOCK);
-define_compile(ARG);
-define_compile(OP);
-define_compile(SEQ);
-define_compile(ASS);
-define_compile(WHILE);
-define_compile(IF);
-define_compile(BRANCH);
-define_compile(CALL);
-define_compile(PAR);
-define_compile(RET);
-define_compile(CONST);
-define_compile(VAR);
-
-define_compile(CMP);
-define_compile(LOGIC);
+#define NODE_TYPE(name, ...) define_compile(name);
+#include "node_types.h"
+#undef NODE_TYPE
 
 /* Wow, four almost identical functions :(
     Sadly, C preprocessor cannot fix this problem */

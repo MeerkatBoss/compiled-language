@@ -12,7 +12,7 @@ struct file_pos
 };
 
 
-bool parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) * tokens)
+bool lexer_parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) * tokens)
 {
     const lexer_node* cur_node = tree->root;
 
@@ -55,7 +55,7 @@ bool parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) 
             size_t len = current_pos.offset - token_pos.offset;
             char* tok_str = strndup(str + token_pos.offset, len);
 
-            array_push(tokens, make_token(
+            array_push(tokens, token_ctor(
                                         tok_str,
                                         cur_node->type,
                                         token_pos.line,
@@ -71,7 +71,7 @@ bool parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) 
             size_t len = complete_pos.offset - token_pos.offset;
             char* tok_str = strndup(str + token_pos.offset, len);
 
-            array_push(tokens, make_token(
+            array_push(tokens, token_ctor(
                                         tok_str,
                                         complete->type,
                                         token_pos.line,
@@ -91,7 +91,7 @@ bool parse_tokens(const char *str, const lexer_tree *tree, dynamic_array(token) 
             (int)len, str + token_pos.offset, token_pos.line, token_pos.column);
     }
 
-    array_push(tokens, make_token(strdup(""), TOK_EOF, current_pos.line, current_pos.column));
+    array_push(tokens, token_ctor(strdup(""), TOK_EOF, current_pos.line, current_pos.column));
 
     return true;
 }
