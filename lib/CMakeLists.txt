@@ -9,5 +9,6 @@ add_subdirectory(name_scopes)
 
 add_subdirectory(lexer)
 add_subdirectory(parser)
+add_subdirectory(simplifier)
 add_subdirectory(compiler)
 add_subdirectory(decompiler)
