@@ -455,7 +455,7 @@ define_compile(BRANCH)
         state->control_flow_cur = *array_back(&state->control_flow_stack);
         array_pop(&state->control_flow_stack);
         if (node->right != NULL)    // skip over non-empty 'else' branch
-            fprintf(state->output, "jmp .if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cur);
+            fprintf(state->output, "\t\tjmp .if_%s_0x%zX_end\n\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILING_RIGHT:
         fprintf(state->output, ".if_%s_0x%zX_false:\n", state->func_name, state->control_flow_cur);

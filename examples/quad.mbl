@@ -1,0 +1,61 @@
+var x1 := 0.0'
+var x2 := 0.0'
+
+fu n solv_leenear( var k, var b 0
+[
+    eef ( k ==== 0.0 0
+    [
+        eef ( b ==== 0.0 0 riturn 3'
+        els                riturn 0.0'
+    }
+    riturn -b / k'
+}
+
+fu n solv_qwadratik( var a, var b, var c 0
+[
+    eef ( a ==== 0.0 0 riturn solv_leenear( b, c 0'
+    var discrmant := b 8 b - 4 8 a 8 c'
+    eef ( discrmant ==== 0.0 0
+    [
+        x1 <_ -b / ( 2 8 a 0'
+        riturn 1'
+    }
+    eef ( discrmant < 0.0 0 riturn 0.0'
+    discrmant <_ sqrt( discrmant 0'
+    x1 <_ ( -b - discrmant 0 / ( 2 8 a 0'
+    x2 <_ ( -b + discrmant 0 / ( 2 8 a 0'
+    riturn 2'
+}
+
+fu n preent_rots( var cnt 0
+[
+    eef ( cnt ==== 0.0 0
+        print( 0.000 0'
+    els eef ( cnt ==== 1 0
+    [
+        print( 0.001 0'
+        print( x1 0'
+    }
+    els eef ( cnt ==== 2 0
+    [
+        print( 0.002 0'
+        print( x1 0'
+        print( x2 0'
+    }
+    els 
+        print( print( 999.999 0 0'
+    
+    riturn cnt'
+}
+
+fu n main( 0
+[
+    preent_rots(
+        solv_qwadratik(
+            read(0 8 1000,
+            read(0 8 1000,
+            read(0 8 1000
+        0
+    0'
+    riturn 0.0'
+}

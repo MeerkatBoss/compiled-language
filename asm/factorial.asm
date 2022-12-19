@@ -18,20 +18,24 @@ factorial:
 		pop [rbp+.n.var_0x0]
 ; Start of .if_factorial_0x0
 		push [rbp+.n.var_0x0]
-		push 1000
+		push 1
 		call __op.leq
 		push 0
 		je .if_factorial_0x0_false
 
-		push 1000
+		push 1
 		jmp .factorial.end
 .if_factorial_0x0_false:
 .if_factorial_0x0_end:
 
 		push [rbp+.n.var_0x0]
-		push 1000
+		push 1
 		sub
 		call factorial
+		push 1000000
+		mul
+		push 1000
+		div
 		push [rbp+.n.var_0x0]
 		mul
 		push 1000
@@ -231,7 +235,9 @@ flush:		push vbuf.start
 sqrt:		push rax		; save rax in [rsp]	
 		pop [rsp]
 
-		pop rax			; store parameter in rax
+		push 10
+		mul
+		pop rax			; rax = 10*x
 
 		push rbx		; save register values
 		push rcx
@@ -274,11 +280,9 @@ sq.greater:	push rcx
 		jmp sq.loop.start	; else rdx = m;
 
 sq.loop.end:	push rbx
-		push 1000
+		push 10
 		mul
-		push 32
-		div
-		pop rax			; rax = rbx * 1000 / 32 (normalized with fixed precision)
+		pop rax			; rax = 10*rbx (normalized with fixed precision)
 
 		pop rdx
 		pop rcx

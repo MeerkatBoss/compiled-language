@@ -180,7 +180,7 @@ static ast_node *parse_stmt(parsing_state *state)
         ast_node* call = parse_call(state);
         LOG_ASSERT(call != NULL, return NULL);
 
-        CONSUME_WITH_ERROR(TOK_STMT_END, delete_node(call), "Expected statement terminator.", CUR_POS);
+        CONSUME_WITH_ERROR(TOK_STMT_END, delete_subtree(call), "Expected statement terminator.", CUR_POS);
 
         return call;
     }
@@ -219,7 +219,7 @@ static ast_node *parse_if(parsing_state *state)
                                                 It's actually supposed to be `parse_logic` */
     REPORT_ERROR(cond != NULL, {}, "Expected condition.", CUR_POS);
 
-    CONSUME_WITH_ERROR(TOK_GROUP_RIGHT, {}, "Ill-formed condition.", CUR_POS);
+    CONSUME_WITH_ERROR(TOK_GROUP_RIGHT, delete_subtree(cond), "Ill-formed condition.", CUR_POS);
 
     ast_node* branch = parse_branch(state);
     LOG_ASSERT(branch != NULL, { delete_subtree(cond); return NULL; });
@@ -254,11 +254,11 @@ static ast_node *parse_while(parsing_state *state)
 
     REPORT_ERROR(cond != NULL, {}, "Expected condition.", CUR_POS);
 
-    CONSUME_WITH_ERROR(TOK_GROUP_RIGHT, {}, "Ill-formed condition.", CUR_POS);
+    CONSUME_WITH_ERROR(TOK_GROUP_RIGHT, delete_subtree(cond), "Ill-formed condition.", CUR_POS);
 
     ast_node* stmt = parse_stmt(state);
 
-    LOG_ASSERT_ERROR(stmt != NULL, return NULL, "Statement expected." ERROR_POS, CUR_POS);
+    REPORT_ERROR(stmt != NULL, delete_subtree(cond), "Expected statement", CUR_POS);
 
     return make_node(NODE_WHILE, {}, cond, stmt);
 }

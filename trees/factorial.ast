@@ -19,7 +19,7 @@
             OP,
             LEQ,
             { VAR, n, {}, {} },
-            { CONST, 1.000, {}, {} }
+            { CONST, 0.001, {}, {} }
           },
           {
             BRANCH,
@@ -28,7 +28,7 @@
               RET,
               NULL,
               {},
-              { CONST, 1.000, {}, {} }
+              { CONST, 0.001, {}, {} }
             },
             {}
           }
@@ -44,20 +44,25 @@
               OP,
               MUL,
               {
-                CALL,
-                factorial,
-                {},
+                OP,
+                MUL,
                 {
-                  PAR,
-                  NULL,
+                  CALL,
+                  factorial,
+                  {},
                   {
-                    OP,
-                    SUB,
-                    { VAR, n, {}, {} },
-                    { CONST, 1.000, {}, {} }
-                  },
-                  {}
-                }
+                    PAR,
+                    NULL,
+                    {
+                      OP,
+                      SUB,
+                      { VAR, n, {}, {} },
+                      { CONST, 0.001, {}, {} }
+                    },
+                    {}
+                  }
+                },
+                { CONST, 1000.000, {}, {} }
               },
               { VAR, n, {}, {} }
             }
