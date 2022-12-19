@@ -53,12 +53,13 @@ static bool collapse_const        (ast_node* node);
 
 static bool simplify_node(ast_node * node)
 {
+    if (!node) return true;
     if (is_num(node)) extract_negative(node);
-    if (!is_op(node)) return true;;
 
     LOG_ASSERT(simplify_node(node-> left), return false);
     LOG_ASSERT(simplify_node(node->right), return false);
 
+    if (!is_op(node)) return true;;
     if (is_neg(LEFT) && is_neg(RIGHT)) LOG_ASSERT(extract_negative      (node), return false);
     if (is_neg(LEFT))                  LOG_ASSERT(extract_left_negative (node), return false);
     if (is_neg(RIGHT))                 LOG_ASSERT(extract_right_negative(node), return false);
@@ -86,7 +87,7 @@ static void replace_with(ast_node* dest, ast_node* src)
     src->left  = NULL;
     src->right = NULL;
 
-    delete_node(src);
+    free(src);
 }
 
 static inline void assign_num(ast_node* dest, double num)
@@ -100,6 +101,9 @@ static inline void assign_num(ast_node* dest, double num)
     dest->left = NULL;
     dest->right = NULL;
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
 
 static bool collapse_const(ast_node* node)
 {
@@ -125,6 +129,8 @@ static bool collapse_const(ast_node* node)
 
     #undef COMBINE_CHILDREN
     #undef ASSIGN_NODE
+
+    return true;
 }
 
 static bool extract_negative(ast_node* node)
@@ -138,7 +144,7 @@ static bool extract_negative(ast_node* node)
             node->type = NODE_OP;
             node->value.op = OP_NEG;
         }
-        return;
+        return true;
     }
 
     LOG_ASSERT(is_op(node), return false);
@@ -166,6 +172,7 @@ static bool extract_negative(ast_node* node)
     default:
         break;
     }
+    return true;
 }
 
 static bool extract_left_negative(ast_node* node)
@@ -195,6 +202,7 @@ static bool extract_left_negative(ast_node* node)
     default:
         break;
     }
+    return true;
 }
 
 static bool extract_right_negative(ast_node* node)
@@ -229,6 +237,7 @@ static bool extract_right_negative(ast_node* node)
         break;
     }
 
+    return true;
 }
 
 static bool extract_left_zero(ast_node* node)
@@ -253,13 +262,14 @@ static bool extract_left_zero(ast_node* node)
     default:
         break;
     }
+    return true;
 }
 
 static bool extract_right_zero(ast_node* node)
 {
     LOG_ASSERT(is_op(node), return false);
     LOG_ASSERT(is_zero(RIGHT), return false);
-    LOG_ASSERT_ERROR(!op_cmp(node, OP_DIV), return, "Division by zero", NULL);
+    LOG_ASSERT_ERROR(!op_cmp(node, OP_DIV), return false, "Division by zero", NULL);
 
     switch (get_op(node))
     {
@@ -275,6 +285,7 @@ static bool extract_right_zero(ast_node* node)
     default:
         break;
     }
+    return true;
 }
 
 static bool extract_left_one(ast_node *node)
@@ -291,6 +302,8 @@ static bool extract_left_one(ast_node *node)
     default:
         break;
     }
+
+    return true;
 }
 
 static bool extract_right_one(ast_node *node)
@@ -308,6 +321,7 @@ static bool extract_right_one(ast_node *node)
     default:
         break;
     }
+    return true;
 }
 
 static bool collapse_var(ast_node *node)
@@ -330,4 +344,7 @@ static bool collapse_var(ast_node *node)
     default:
         break;
     }
+    return true;
 }
+
+#pragma GCC diagnostic pop
