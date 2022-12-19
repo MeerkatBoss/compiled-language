@@ -14,7 +14,8 @@ struct compilation_state
     const char* func_name;
     size_t block_depth;
     bool has_return;
-    size_t control_flow_cnt;
+    size_t control_flow_cur;
+    size_t control_flow_max;
     dynamic_array(size_t) control_flow_stack;
     FILE* output;
 };
@@ -46,7 +47,8 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output, bool u
         .func_name = NULL,
         .block_depth = 0,
         .has_return = false,
-        .control_flow_cnt = 0,
+        .control_flow_cur = 0,
+        .control_flow_max = 0,
         .control_flow_stack = {},
         .output = output
     };
@@ -394,19 +396,19 @@ define_compile(WHILE)
     switch (stage)
     {
     case STAGE_COMPILING_LEFT:
-        fprintf(state->output, ".while_%s_0x%zX_start:\n", state->func_name, state->control_flow_cnt);
+        fprintf(state->output, ".while_%s_0x%zX_start:\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILED_LEFT:
         fputs("\t\tpush 0", state->output);
-        fprintf(state->output, "\t\t je .while_%s_0x%zX_end\n\n", state->func_name, state->control_flow_cnt);
+        fprintf(state->output, "\t\t je .while_%s_0x%zX_end\n\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILING_RIGHT:
-        array_push(&state->control_flow_stack, state->control_flow_cnt);
-        state->control_flow_cnt++;
+        array_push(&state->control_flow_stack, state->control_flow_cur);
+        state->control_flow_cur++;
         return true;
     case STAGE_COMPILED_RIGHT:
-        fprintf(state->output, ".while_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cnt);
-        state->control_flow_cnt = *array_back(&state->control_flow_stack);
+        fprintf(state->output, ".while_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cur);
+        state->control_flow_cur = *array_back(&state->control_flow_stack);
         array_pop(&state->control_flow_stack);
         return true;
     default:
@@ -422,16 +424,17 @@ define_compile(IF)
     switch (stage)
     {
     case STAGE_COMPILING_LEFT:
-        fprintf(state->output, "; Start of .if_%s_0x%zX\n", state->func_name, state->control_flow_cnt);
+        state->control_flow_cur = state->control_flow_max++;
+        fprintf(state->output, "; Start of .if_%s_0x%zX\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILED_LEFT:
         fputs("\t\tpush 0\n", state->output);
-        fprintf(state->output, "\t\tje .if_%s_0x%zX_false\n\n", state->func_name, state->control_flow_cnt);
+        fprintf(state->output, "\t\tje .if_%s_0x%zX_false\n\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILING_RIGHT:
         return true;
     case STAGE_COMPILED_RIGHT:
-        fprintf(state->output, ".if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cnt);
+        fprintf(state->output, ".if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cur);
         return true;
     default:
         LOG_ASSERT(0 && "Unreachable code", return false);
@@ -446,22 +449,21 @@ define_compile(BRANCH)
     switch (stage)
     {
     case STAGE_COMPILING_LEFT:
-        array_push(&state->control_flow_stack, state->control_flow_cnt);
-        state->control_flow_cnt++;
+        array_push(&state->control_flow_stack, state->control_flow_cur);
         return true;
     case STAGE_COMPILED_LEFT:
-        state->control_flow_cnt = *array_back(&state->control_flow_stack);
+        state->control_flow_cur = *array_back(&state->control_flow_stack);
         array_pop(&state->control_flow_stack);
         if (node->right != NULL)    // skip over non-empty 'else' branch
-            fprintf(state->output, "jmp .if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cnt);
+            fprintf(state->output, "jmp .if_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILING_RIGHT:
-        fprintf(state->output, ".if_%s_0x%zX_false:\n", state->func_name, state->control_flow_cnt);
-        array_push(&state->control_flow_stack, state->control_flow_cnt);
-        state->control_flow_cnt++;
+        fprintf(state->output, ".if_%s_0x%zX_false:\n", state->func_name, state->control_flow_cur);
+        array_push(&state->control_flow_stack, state->control_flow_cur);
+        state->control_flow_cur++;
         return true;
     case STAGE_COMPILED_RIGHT:
-        state->control_flow_cnt = *array_back(&state->control_flow_stack);
+        state->control_flow_cur = *array_back(&state->control_flow_stack);
         array_pop(&state->control_flow_stack);
         return true;
     default:
