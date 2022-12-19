@@ -66,6 +66,8 @@ solv_leenear:
 		mul
 		push [rbp+.k.var_0x2]
 		div
+		pop [.x1.var_0x0]
+		push 1000
 		jmp .solv_leenear.end
 .solv_leenear.end:
 		push rbp

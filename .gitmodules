@@ -7,3 +7,6 @@
 [submodule "lib/text_lines"]
 	path = lib/text_lines
 	url = https://github.com/MeerkatBoss/text_lines
+[submodule "standard"]
+	path = standard
+	url = https://github.com/MeerkatBoss/ast-standard

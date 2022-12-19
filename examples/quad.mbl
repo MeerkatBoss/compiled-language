@@ -8,7 +8,8 @@ fu n solv_leenear( var k, var b 0
         eef ( b ==== 0.0 0 riturn 3'
         els                riturn 0.0'
     }
-    riturn -b / k'
+    x1 <_ -b / k'
+    riturn 1'
 }
 
 fu n solv_qwadratik( var a, var b, var c 0
