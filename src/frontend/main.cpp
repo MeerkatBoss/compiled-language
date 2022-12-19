@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     if (state.reverse)
         status = reverse_flow(&tree, &tokens, &state);
     else
-        status = reverse_flow(&tree, &tokens, &state);
+        status = regular_flow(&tree, &tokens, &state);
 
     tree_dtor(&tree);
     array_dtor(&tokens);

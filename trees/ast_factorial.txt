@@ -1,0 +1,145 @@
+ { DEFS, NULL, 
+   { NFUN, factorial, 
+      { ARG, cnt, 
+         {},
+         {}
+      },
+      { BLOCK, NULL, 
+         {},
+         { SEQ, NULL, 
+            { IF, NULL, 
+               { OP, LT, 
+                  { VAR, cnt, 
+                     {},
+                     {}
+                  },
+                  { CONST, 0.000, 
+                     {},
+                     {}
+                  }
+               },
+               { BRANCH, NULL, 
+                  { RET, NULL, 
+                     {},
+                     { OP, NEG, 
+                        {},
+                        { CONST, 1000.000, 
+                           {},
+                           {}
+                        }
+                     }
+                  },
+                  {}
+               }
+            },
+            { SEQ, NULL, 
+               { IF, NULL, 
+                  { OP, EQ, 
+                     { VAR, cnt, 
+                        {},
+                        {}
+                     },
+                     { CONST, 0.000, 
+                        {},
+                        {}
+                     }
+                  },
+                  { BRANCH, NULL, 
+                     { RET, NULL, 
+                        {},
+                        { CONST, 1.000, 
+                           {},
+                           {}
+                        }
+                     },
+                     {}
+                  }
+               },
+               { SEQ, NULL, 
+                  { RET, NULL, 
+                     {},
+                     { OP, MUL, 
+                        { VAR, cnt, 
+                           {},
+                           {}
+                        },
+                        { CALL, factorial, 
+                           {},
+                           { PAR, NULL, 
+                              { OP, SUB, 
+                                 { VAR, cnt, 
+                                    {},
+                                    {}
+                                 },
+                                 { CONST, 1.000, 
+                                    {},
+                                    {}
+                                 }
+                              },
+                              {}
+                           }
+                        }
+                     }
+                  },
+                  {}
+               }
+            }
+         }
+      }
+   },
+   { DEFS, NULL, 
+      { NFUN, main, 
+         {},
+         { BLOCK, NULL, 
+            {},
+            { SEQ, NULL, 
+               { NVAR, num, 
+                  {},
+                  { CALL, read, 
+                     {},
+                     {}
+                  }
+               },
+               { SEQ, NULL, 
+                  { NVAR, val, 
+                     {},
+                     { CALL, factorial, 
+                        {},
+                        { PAR, NULL, 
+                           { VAR, num, 
+                              {},
+                              {}
+                           },
+                           {}
+                        }
+                     }
+                  },
+                  { SEQ, NULL, 
+                     { CALL, print, 
+                        {},
+                        { PAR, NULL, 
+                           { VAR, val, 
+                              {},
+                              {}
+                           },
+                           {}
+                        }
+                     },
+                     { SEQ, NULL, 
+                        { RET, NULL, 
+                           {},
+                           { CONST, 0.000, 
+                              {},
+                              {}
+                           }
+                        },
+                        {}
+                     }
+                  }
+               }
+            }
+         }
+      },
+      {}
+   }
+ }

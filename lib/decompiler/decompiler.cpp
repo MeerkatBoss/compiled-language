@@ -136,15 +136,14 @@ define_decompile(NFUN)
     {
         case STAGE_DECOMPILING_LEFT:
             array_push(state->tokens, make_token(TOK_FUNC));
-            return;
-        case STAGE_DECOMPILED_LEFT:
-            return;     // No lexeme
-        case STAGE_DECOMPILING_RIGHT:
+            array_push(state->tokens, make_token(node->value.name));
             array_push(state->tokens, make_token(TOK_GROUP_LEFT));
             return;
-        case STAGE_DECOMPILED_RIGHT:
+        case STAGE_DECOMPILED_LEFT:
             array_push(state->tokens, make_token(TOK_GROUP_RIGHT));
             return;
+        case STAGE_DECOMPILING_RIGHT:
+        case STAGE_DECOMPILED_RIGHT:
         default:
             return;
     }
@@ -156,7 +155,9 @@ define_decompile(ARG)
     switch (stage)
     {
         case STAGE_DECOMPILING_LEFT:
-            return array_push(state->tokens, make_token(TOK_VAR));
+            array_push(state->tokens, make_token(TOK_VAR));
+            array_push(state->tokens, make_token(node->value.name));
+            return;
         case STAGE_DECOMPILED_LEFT:
             if (node->right) return array_push(state->tokens, make_token(TOK_COMMA));
             return;
@@ -292,7 +293,7 @@ define_decompile(PAR)
     return;
 }
 
-static token_type get_op_token(node_type type);
+static token_type get_op_token(op_type type);
 static bool require_left_group(const ast_node* node);
 static bool require_right_group(const ast_node* node);
 
@@ -307,7 +308,7 @@ define_decompile(OP)
         case STAGE_DECOMPILED_LEFT:
             if (require_left_group(node))
                 return array_push(state->tokens, make_token(TOK_GROUP_RIGHT));
-            return array_push(state->tokens, make_token(get_op_token(node->type)));
+            return array_push(state->tokens, make_token(get_op_token(node->value.op)));
         case STAGE_DECOMPILING_RIGHT:
             if (require_right_group(node))
                 return array_push(state->tokens, make_token(TOK_GROUP_LEFT));
@@ -337,7 +338,7 @@ define_decompile(CONST)
     return;
 }
 
-static token_type get_op_token(node_type type)
+static token_type get_op_token(op_type type)
 {
     switch (type)
     {
@@ -378,7 +379,7 @@ static inline bool is_logic(op_type op)
 
 static bool require_left_group(const ast_node* node)
 {
-    if (!node->left) return false;
+    if (!node->left || node->left->type != NODE_OP) return false;
     switch (node->value.op)
     {
         case OP_OR: return false;
@@ -407,7 +408,7 @@ static bool require_left_group(const ast_node* node)
 
 static bool require_right_group(const ast_node* node)
 {
-    if (!node->right) return false;
+    if (!node->right || node->right->type != NODE_OP) return false;
     switch (node->value.op)
     {
         case OP_OR: return false;

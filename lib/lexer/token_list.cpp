@@ -43,22 +43,33 @@ static inline void indent(size_t level, FILE* stream)
 void token_array_generate_source(const dynamic_array(token) * tokens, FILE *stream)
 {
     size_t indent_lvl = 0;
+    bool require_indent = false;
     for (size_t i = 0; i < tokens->size; i++)
     {
         token* cur = array_get_element(tokens, i);
-        indent(indent_lvl, stream);
-        fputs(cur->str, stream);
-        if (cur->type == TOK_BLOCK_START || cur->type == TOK_BLOCK_END || cur->type == TOK_STMT_END)
-            fputc('\n', stream);
-        else if (i < tokens->size - 1 && tokens->data[i + 1].type != TOK_COMMA)
-            fputc(' ', stream);
+        token* nxt = (i < tokens->size - 1
+                        ? array_get_element(tokens, i + 1)
+                        : NULL);
         if (cur->type == TOK_BLOCK_START)
             indent_lvl++;
         else if (cur->type == TOK_BLOCK_END)
+            indent_lvl--;
+
+        if (require_indent)
+        {
+            indent(indent_lvl, stream);
+            require_indent = false;
+        }
+        fputs(cur->str, stream);
+        
+        if (cur->type == TOK_BLOCK_START || cur->type == TOK_BLOCK_END || cur->type == TOK_STMT_END)
         {
             fputc('\n', stream);
-            indent_lvl--;
+            require_indent = true;
         }
+        else if (nxt && nxt->type != TOK_COMMA && nxt->type != TOK_STMT_END)
+            fputc(' ', stream);
+
     }
 }
 
@@ -113,7 +124,7 @@ token make_token(double num)
 {
     char* str = NULL;
     int size = snprintf(NULL, 0, "%.3lf", num);
-    str = (char*) calloc(size, sizeof(char));
+    str = (char*) calloc(size + 1, sizeof(char));
     sprintf(str, "%.3f", num);
     return {
         .type = TOK_NUM,
