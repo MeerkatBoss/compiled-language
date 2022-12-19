@@ -1,4 +1,4 @@
-add_library(parser parser.cpp)
+add_library(parser parser.cpp derivative.cpp)
 
 target_link_libraries(parser PUBLIC ast lexer liblogs)
 

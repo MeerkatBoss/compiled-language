@@ -1,5 +1,6 @@
 #include "logger.h"
 
+#include "derivative.h"
 #include "parser.h"
 
 struct parsing_state
@@ -43,6 +44,7 @@ static ast_node* parse_and   (parsing_state* state);
 static ast_node* parse_not   (parsing_state* state);
 static ast_node* parse_cmp   (parsing_state* state);
 static ast_node* parse_op    (parsing_state* state);
+static ast_node* parse_deriv (parsing_state* state);
 static ast_node* parse_term  (parsing_state* state);
 static ast_node* parse_unary (parsing_state* state);
 static ast_node* parse_group (parsing_state* state);
@@ -364,7 +366,7 @@ static ast_node *parse_cmp(parsing_state *state)
 
 static ast_node *parse_op(parsing_state *state)
 {
-    ast_node* result = parse_term(state);
+    ast_node* result = parse_deriv(state);
     LOG_ASSERT(result != NULL, return NULL);
 
     while (consume(state, TOK_PLUS) || consume(state, TOK_MINUS))
@@ -372,12 +374,38 @@ static ast_node *parse_op(parsing_state *state)
         op_type op = (peek_last(state)->type == TOK_PLUS
                         ? OP_ADD
                         : OP_SUB);
-        ast_node* operand = parse_term(state);
+        ast_node* operand = parse_deriv(state);
         REPORT_ERROR(operand != NULL, delete_subtree(result), "Expected expression.", CUR_POS);
         result = make_node(NODE_OP, {.op = op}, result, operand);
     }
 
     return result;
+}
+
+ast_node *parse_deriv(parsing_state *state)
+{
+    if (!consume(state, TOK_DIFFERENTIAL))
+        return parse_term(state);
+    
+    size_t line_num = peek(state)->line_num;
+    size_t char_num = peek(state)->char_num;
+    ast_node* expr = parse_group(state);
+    REPORT_ERROR(expr != NULL, {}, "Expected expression.", line_num, char_num);
+    CONSUME_WITH_ERROR(TOK_SLASH, delete_subtree(expr), "Division expected.", CUR_POS);
+    CONSUME_WITH_ERROR(TOK_DIFFERENTIAL, delete_subtree(expr), "Differential expected.", CUR_POS);
+
+    ast_node* var = parse_var(state);
+    LOG_ASSERT(var, { delete_subtree(expr); return NULL; });
+
+    ast_node* derivative = get_differential(expr, var->value.name);
+
+    REPORT_ERROR(derivative != NULL, { delete_subtree(var); delete_subtree(expr); },
+            "Expression cannot be differentiated.", line_num, char_num);
+
+    delete_subtree(expr);
+    delete_subtree(var);
+
+    return derivative;
 }
 
 static ast_node *parse_term(parsing_state *state)

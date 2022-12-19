@@ -23,13 +23,21 @@ ast_node *make_node(node_type type, node_value val, ast_node *left, ast_node *ri
     return node;
 }
 
-ast_node *copy_subtree(ast_node *node)
+ast_node *copy_subtree(const ast_node *node)
 {
     if (!node) return NULL;
 
+    node_value value = {};
+    if (node->type == NODE_VAR  || node->type == NODE_CALL ||
+        node->type == NODE_NVAR || node->type == NODE_NFUN ||
+        node->type == NODE_ASS)
+        value.name = strdup(node->value.name);
+    else
+        value = node->value;
+
     return make_node(
                 node->type,
-                node->value,
+                value,
                 copy_subtree(node->left),
                 copy_subtree(node->right));
 }

@@ -19,7 +19,8 @@ AND     ::= NOT {'&&' NOT}
 NOT     ::= CMP | '!' NOT
 CMP     ::= OP {CMP_OP OP}
 CMP_OP  ::= '>' | '<' | "<=" | ">=" | "==" | "!="
-OP      ::= TERM [('+' | '-') OP]
+OP      ::= DERIV [('+' | '-') OP]
+DERIV   ::= TERM | ('d' GROUP '/' 'd' VAR)
 TERM    ::= UNARY [('*' | '/') TERM]
 UNARY   ::= '-' GROUP | ATOM
 GROUP   ::= '(' EXPR ')' | ATOM

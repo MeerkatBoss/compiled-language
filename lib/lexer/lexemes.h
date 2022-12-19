@@ -52,3 +52,4 @@ LEXEME(NEQ, "1=")
 
 LEXEME(RETURN, "riturn")
 
+LEXEME(DIFFERENTIAL, "d")

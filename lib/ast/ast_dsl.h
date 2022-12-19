@@ -17,7 +17,10 @@ inline bool     op_cmp (const ast_node* node, op_type op)   { return is_op(node)
 
 inline char*    get_var(const ast_node* node)               { return node->value.name; }
 inline bool     is_var (const ast_node* node)               { return node && node->type == NODE_VAR; }
-inline bool     var_cmp(const ast_node* node, char* var)    { return is_var(node) && strcmp(get_var(node), var) == 0; }
+inline bool     var_cmp(const ast_node* node, const char* var)
+{
+    return is_var(node) && strcmp(get_var(node), var) == 0;
+}
 
 /**
  * @brief Create syntax tree node for binary operation
@@ -50,7 +53,7 @@ ast_node* make_number_node(double val);
  * @param[in] id Variable id
  * @return Created node
  */
-ast_node* make_var_node(char* var);
+ast_node* make_var_node(const char* var);
 
 
 #endif

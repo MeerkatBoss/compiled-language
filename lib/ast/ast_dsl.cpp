@@ -17,7 +17,7 @@ ast_node * make_number_node(double val)
     return make_node(NODE_CONST, {.num = val}, NULL, NULL);
 }
 
-ast_node * make_var_node(char* var) 
+ast_node * make_var_node(const char* var) 
 {
-    return make_node(NODE_VAR, {.name = var}, NULL, NULL);
+    return make_node(NODE_VAR, {.name = strdup(var)}, NULL, NULL);
 }

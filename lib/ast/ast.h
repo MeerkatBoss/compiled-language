@@ -133,7 +133,7 @@ ast_node* make_node(node_type type, node_value val, ast_node* left, ast_node* ri
 
 /* TODO: docs */ 
 
-ast_node* copy_subtree(ast_node* node);
+ast_node* copy_subtree(const ast_node* node);
 
 /**
  * @brief Delete ast node. Free associated resources.
