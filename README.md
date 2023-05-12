@@ -11,7 +11,7 @@ G       ::= DEFS '\0'
 DEFS    ::= DEF [DEFS]
 DEF     ::= NVAR | NFUN
 NVAR    ::= "var" NAME [":=" OP] '\''
-NFUN    ::= "fu n" NAME ([ARG]) BLOCK
+NFUN    ::= "fu n" NAME '('[ARG]'0' BLOCK
 ARG     ::= "var" NAME [',' ARG]
 BLOCK   ::= '[' SEQ '}'
 SEQ     ::= STMT [SEQ]
