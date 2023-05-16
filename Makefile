@@ -1,5 +1,9 @@
 CC:=g++
 
+# General-purpuse compiler flags
+CFLAGS:=-std=c++2a -ggdb3 -fPIE -pie $(CMACHINE) $(CWARN)
+
+# Warning flags
 CWARN:=-Wall -Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++14-compat\
 -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts\
 -Wconditionally-supported -Wconversion -Wctor-dtor-privacy -Wempty-body\
@@ -14,25 +18,27 @@ CWARN:=-Wall -Wextra -Weffc++ -Waggressive-loop-optimizations -Wc++14-compat\
 -Wno-narrowing -Wno-old-style-cast -Wno-varargs -Wstack-protector\
 -Wlarger-than=8192 -Wstack-usage=8192
 
-CDEBUG:=-D _DEBUG -ggdb3 -fcheck-new -fsized-deallocation -fstack-protector\
+# Debug sanitizer flags
+CDEBUG:=-D _DEBUG -fcheck-new -fsized-deallocation -fstack-protector\
 -fstrict-overflow -flto-odr-type-merging -fno-omit-frame-pointer\
 -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,${strip \
 }float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,${strip \
 }null,object-size,return,returns-nonnull-attribute,shift,${strip \
 }signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
+# Machine-specific flags
 CMACHINE:=-mavx512f
 
-CFLAGS:=-std=c++2a -fPIE -pie $(CMACHINE) $(CWARN)
 BUILDTYPE?=Debug
 
+# Select optimization level and sanitizer based on BUILDTYPE
 ifeq ($(BUILDTYPE), Release)
 	CFLAGS:=-O3 $(CFLAGS)
 else
 	CFLAGS:=-O0 $(CDEBUG) $(CFLAGS)
 endif
 
-PROJECT	:= project
+PROJECT	:= tlc
 VERSION := 0.0.1
 
 SRCDIR	:= src
@@ -48,56 +54,73 @@ SRCEXT	:= cpp
 HEADEXT	:= h
 OBJEXT	:= o
 
+# Name of test binary
+TEST_BIN_NAME:=$(PROJECT)_tests
 
+# Find all source files
 SOURCES := $(shell find $(SRCDIR) -type f -name "*.$(SRCEXT)")
-TESTS	:= $(shell find $(TESTDIR) -type f -name "*$(SRCEXT)")
-LIBS	:= $(patsubst lib%.a, %, $(shell find $(LIBDIR) -type f))
-OBJECTS	:= $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
-TESTOBJS:= $(patsubst %,$(OBJDIR)/%,$(TESTS:.$(SRCEXT)=.$(OBJEXT)))
+# Select all 'main.cpp's
+MAIN_SRCS := $(filter %/main.$(SRCEXT), $(SOURCES))
+# Determine the suffixes of executables
+EXE_SUFFIX := $(patsubst $(SRCDIR)/$(PROJECT)/%, %, $(MAIN_SRCS:/main.$(SRCEXT)=))
 
+# Executable file names
+EXECUTABLES := $(patsubst %, $(BINDIR)/$(PROJECT)_%,$(EXE_SUFFIX))
+
+# Exclude 'main.cpp's from object list
+SOURCES := $(filter-out $(MAIN_SRCS), $(SOURCES))
+# Common object files
+OBJECTS	:= $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.$(SRCEXT)=.$(OBJEXT)))
+
+# Test source files
+TESTSRCS:= $(shell find $(TESTDIR) -type f -name "*$(SRCEXT)")
+# Test object files
+TESTOBJS:= $(patsubst %,$(OBJDIR)/%,$(TESTSRCS:.$(SRCEXT)=.$(OBJEXT)))
+# Static libraries
+LIBS	:= $(patsubst $(LIBDIR)/lib%.a, %, $(shell find $(LIBDIR) -type f))
+
+# Include compiler flags
 INCFLAGS:= -I$(SRCDIR) -I$(INCDIR)
+# Linker flags
 LFLAGS  := -Llib/ $(addprefix -l, $(LIBS))
 
-all: $(BINDIR)/$(PROJECT)
+ARGS?=--help
+
+all: $(EXECUTABLES)
 
 remake: cleaner all
 
 init:
 	@mkdir -p $(SRCDIR)
+	@mkdir -p $(TESTDIR)
 	@mkdir -p $(INCDIR)
 	@mkdir -p $(LIBDIR)
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(BINDIR)
 
-build_lib: $(OBJECTS)
-	@mkdir -p dist/include
-	@mkdir -p dist/lib
-	@ar rcs dist/lib/lib$(PROJECT).a $^
-	@find $(SRCDIR) -type f -name *.$(HEADEXT) -exec\
-		bash -c 'cp -p --parents {} dist/include' \;
-	@tar -czf dist/$(PROJECT)-$(VERSION)-linux-x86_64.tar.gz dist/*
-	@rm -r dist/include
-	@rm -r dist/lib
-
-# Build test objects
-$(OBJDIR)/$(TESTDIR)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
-	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $(INCFLAGS) -I$(TESTDIR) -c $< -o $@
-
-# Build source objects
+# Collect source objects
 $(OBJDIR)/%.$(OBJEXT): $(SRCDIR)/%.$(SRCEXT)
+	@echo Collecting $@
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@
 
-# Build project binary
-$(BINDIR)/$(PROJECT): $(OBJECTS)
+# Build project binaries
+$(BINDIR)/$(PROJECT)_%: $(OBJECTS) $(OBJDIR)/$(PROJECT)/%/main.$(OBJEXT)
+	@echo Building $@
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $^ $(LFLAGS) -o $(BINDIR)/$(PROJECT)
+	@$(CC) $(CFLAGS) $^ $(LFLAGS) -o $@
+
+# Collect test objects
+$(OBJDIR)/$(TESTDIR)/%.$(OBJEXT): $(TESTDIR)/%.$(SRCEXT)
+	@echo Collecting $@
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) $(INCFLAGS) -I$(TESTDIR) -c $< -o $@
 
 # Build test binary
-$(BINDIR)/$(PROJECT)_tests: $(filter-out %/main.o,$(OBJECTS)) $(TESTOBJS)
+$(BINDIR)/$(TEST_BIN_NAME): $(filter-out %/main.$(OBJEXT),$(OBJECTS)) $(TESTOBJS)
+	@echo Building $@
 	@mkdir -p $(dir $@)
-	@$(CC) $(CFLAGS) $^ $(LFLAGS) -o $(BINDIR)/$(PROJECT)_tests
+	@$(CC) $(CFLAGS) $^ $(LFLAGS) -o $@
 
 clean:
 	@rm -rf $(OBJDIR)
@@ -105,11 +128,11 @@ clean:
 cleaner: clean
 	@rm -rf $(BINDIR)
 
-run: $(BINDIR)/$(PROJECT)
-	$(BINDIR)/$(PROJECT) $(ARGS)
+run_%: $(BINDIR)/$(PROJECT)_%
+	@$< $(ARGS)
 
-test: $(BINDIR)/$(PROJECT)_tests
-	 $(BINDIR)/$(PROJECT)_tests $(ARGS)
+test: $(TEST_BIN_NAME)
+	@$< $(ARGS)
 
 .PHONY: all remake clean cleaner
 
