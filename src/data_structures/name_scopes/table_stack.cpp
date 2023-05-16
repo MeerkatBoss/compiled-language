@@ -35,15 +35,22 @@ void table_stack_dtor(table_stack *tb_stack)
     memset(tb_stack, 0, sizeof(*tb_stack));
 }
 
-void table_stack_add_table(table_stack *tb_stack)
+long table_stack_get_next_offset(table_stack* tb_stack)
+{
+    LOG_ASSERT(tb_stack->tables.size > 0, return 0);
+    
+    var_table* last_table = array_back(&tb_stack->tables);
+    if (last_table->offset <= 0)
+        return 0;
+
+    return last_table->offset + last_table->size * 8;
+}
+
+void table_stack_add_table(table_stack *tb_stack, long offset)
 {
     LOG_ASSERT(tb_stack->tables.size > 0, return);
 
     var_table* last_table = array_back(&tb_stack->tables);
-
-    size_t offset = 0;
-    if (!last_table->is_global)
-        offset = last_table->offset + last_table->vars.size;
 
     var_table added = {};
     var_table_ctor(&added, offset, false);
@@ -53,31 +60,22 @@ void table_stack_add_table(table_stack *tb_stack)
 
 static size_t var_table_find(var_table* table, const char *name);
 
-const char *table_stack_add_var(table_stack *tb_stack, const char *name, size_t *addr)
+bool table_stack_add_var(table_stack *tb_stack, const char *name)
 {
-    static const char LABEL_FORMAT[] = ".%s.var_0x%zX";
-
-    LOG_ASSERT(tb_stack->tables.size > 0, return NULL);
+    LOG_ASSERT(tb_stack->tables.size > 0, return false);
 
     var_table* last_table = array_back(&tb_stack->tables);
     
-    if (var_table_find(last_table, name) < last_table->vars.size) /* Variable already exists*/
-        return NULL;
+    if (var_table_find(last_table, name) < last_table->vars.size)
+        return false; /* Variable already exists*/
 
-    int label_len = snprintf(NULL, 0, LABEL_FORMAT, name, tb_stack->var_cnt);
+    array_push(last_table, name);
 
-    char* label = (char*) calloc(label_len + 1, sizeof(*label));
-
-    sprintf(label, LABEL_FORMAT, name, tb_stack->var_cnt);
-
-    array_push(&last_table->vars, label);
-    tb_stack->var_cnt++;
-
-    *addr = last_table->offset + last_table->vars.size - 1;
-    return label;
+    return true;
 }
 
-const char *table_stack_find_var(const table_stack *tb_stack, const char *name, bool *is_global)
+bool table_stack_find_var(const table_stack* tb_stack, const char* name,
+                          bool* is_global, long* addr)
 {
     for (size_t i = tb_stack->tables.size; i > 0; i--)
     {
@@ -86,20 +84,23 @@ const char *table_stack_find_var(const table_stack *tb_stack, const char *name, 
         if (index < cur_table->vars.size)
         {
             *is_global = cur_table->is_global;
-            return *array_get_element(&cur_table->vars, index);
+            long offset = cur_table->offset + (cur_table->offset < 0
+                                                ? -(long)index*8
+                                                :  (long)index*8);
+            *addr = offset;
+            return true;
         }
     }
 
-    return NULL;
+    return false;
 }
 
 static size_t var_table_find(var_table *table, const char *name)
 {
     for (size_t i = 0; i < table->vars.size; i++)
     {
-        size_t len = strlen(name);
         const char* cur_name = *array_get_element(&table->vars, i);
-        if (strncmp(cur_name + 1, name, len) == 0 && cur_name[len + 1] == '.')
+        if (strcmp(cur_name, name) == 0)
             return i;
     }
     return table->vars.size;

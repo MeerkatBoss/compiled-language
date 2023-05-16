@@ -68,6 +68,12 @@ struct ir_operand
     long                immediate;
 };
 
+#define ir_operand_reg(reg) \
+    { .flags = IR_OPERAND_REG, .reg = (reg), .immediate = 0 };
+
+#define ir_operand_imm(imm) \
+    { .flags = IR_OPERAND_IMM, .reg = IR_REG_NONE, .immediate = imm };
+
 struct ir_node;
 
 typedef ir_node* ir_node_ptr;
@@ -89,6 +95,11 @@ struct ir_node
 
     ir_node_ptr     next;
 };
+
+ir_node* ir_node_new_empty(void);
+ir_node* ir_node_new_call(ir_node_ptr function);
+ir_node* ir_node_new_binary(ir_op operation, ir_operand dest, ir_operand src);
+ir_node* ir_node_new_syscall(void);
 
 /**
  * @brief Print verbose information about IR to specified file
@@ -123,6 +134,18 @@ void ir_list_clear(ir_node* head);
 typedef dynamic_array(ir_node_ptr) ir_node_stack;
 
 __always_inline
+static void ir_stack_ctor(ir_node_stack* stack)
+{
+    array_ctor(stack);
+}
+
+__always_inline
+static void ir_stack_dtor(ir_node_stack* stack)
+{
+    array_dtor(stack);
+}
+
+__always_inline
 static void ir_stack_push(ir_node_stack* stack, ir_node* node)
 {
     array_push(stack, node);
@@ -137,10 +160,6 @@ static ir_node* ir_stack_top(const ir_node_stack* stack)
 {
     return *array_back(stack);
 }
-__always_inline
-static ir_node* ir_node_new_empty(void)
-{
-    return (ir_node*) calloc(1, sizeof(ir_node));
-}
+
 
 #endif /* ir.h */

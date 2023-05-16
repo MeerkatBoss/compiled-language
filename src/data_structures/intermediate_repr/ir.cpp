@@ -16,6 +16,38 @@ static inline void delete_element(ARRAY_ELEMENT* element)
 
 #undef ARRAY_ELEMENT
 
+ir_node* ir_node_new_empty(void)
+{
+    return (ir_node*) calloc(1, sizeof(ir_node));
+}
+
+ir_node* ir_node_new_call(ir_node_ptr function)
+{
+    ir_node* node = ir_node_new_empty();
+    node->is_valid = true;
+    node->operation = IR_CALL;
+    node->jump_target = function;
+    return node;
+}
+
+ir_node* ir_node_new_binary(ir_op operation, ir_operand dest, ir_operand src)
+{
+    ir_node* node = ir_node_new_empty();
+    node->is_valid = true;
+    node->operation = operation;
+    node->operand1 = dest;
+    node->operand2 = src;
+    return node;
+}
+
+ir_node* ir_node_new_syscall(void)
+{
+    ir_node* node = ir_node_new_empty();
+    node->is_valid = true;
+    node->operation = IR_SYSCALL;
+    return node;
+}
+
 static void ir_node_dump(const ir_node* node, FILE* output);
 
 void ir_list_dump(ir_node* head, FILE* output)

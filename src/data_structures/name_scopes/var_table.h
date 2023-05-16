@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-typedef char* var_name;
+typedef const char* var_name;
 
 #define ARRAY_ELEMENT var_name
 
@@ -13,7 +13,7 @@ typedef char* var_name;
 struct var_table
 {
     dynamic_array(var_name) vars;
-    size_t offset;
+    long offset;
     bool is_global;
 };
 
@@ -23,7 +23,7 @@ struct var_table
  * @param[in] offset Address offset for first variable in scope
  * @param[in] is_global `true` if name scope should be global, `false` otherwise
  */
-void var_table_ctor(var_table* table, size_t offset, bool is_global);
+void var_table_ctor(var_table* table, long offset, bool is_global);
 
 /**
  * @brief Destroy name table

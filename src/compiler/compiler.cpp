@@ -2,25 +2,37 @@
 
 #include "data_structures/name_scopes/table_stack.h"
 #include "data_structures/name_scopes/func_array.h"
+#include "data_structures/intermediate_repr/ir.h"
 #include "size_array.h"
 
 #include "compiler.h"
 
 struct compilation_state
 {
-    func_array functions;
+    func_array  functions;
     table_stack name_scope;
 
     const char* func_name;
-    size_t block_depth;
-    bool has_return;
-    size_t control_flow_cur;
-    size_t control_flow_max;
-    dynamic_array(size_t) control_flow_stack;
-    FILE* output;
+    size_t      block_depth;
+    bool        has_return;
+
+    ir_stack   ir_head_stack;
+
+    ir_node_ptr* ir_head;
+    ir_node_ptr* ir_tail;
 };
 
-static inline void state_destroy(compilation_state* state)
+static inline void state_ctor(compilation_state* state, bool use_stdlib)
+{
+    func_array_ctor(&state->functions, use_stdlib);
+    table_stack_ctor(&state->name_scope);
+    ir_stack_ctor(&state->ir_head_stack);
+
+    state->ir_head = ir_node_new_empty();
+    state->ir_tail = state->ir_head;
+}
+
+static inline void state_dtor(compilation_state* state)
 {
     func_array_dtor(&state->functions);
     table_stack_dtor(&state->name_scope);
@@ -41,45 +53,44 @@ static bool compile_node        (const ast_node* node, compilation_state* state)
 
 bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output, bool use_stdlib)
 {
-    compilation_state state = {
-        .functions = {},
-        .name_scope = {},
-        .func_name = NULL,
-        .block_depth = 0,
-        .has_return = false,
-        .control_flow_cur = 0,
-        .control_flow_max = 0,
-        .control_flow_stack = {},
-        .output = output
-    };
-    func_array_ctor(&state.functions, use_stdlib);
-    table_stack_ctor(&state.name_scope);
-    array_ctor(&state.control_flow_stack);
+    compilation_state state = { };
+    state_ctor(&state, use_stlib);
 
-    STEP_WITH_CLEANUP(extract_declarations(tree->root, &state), state_destroy(&state));
+    STEP_WITH_CLEANUP(extract_declarations(tree->root, &state),
+                        state_dtor(&state));
+
+    function* main = func_array_find_func(&state.functions, "main");
 
     AST_ASSERT_WITH_CLEANUP(
-        func_array_find_func(&state.functions, "main") != NULL,
-        state_destroy(&state),
-        "Function 'main' was not defined. Cannot create program entry point.", NULL
+        main != NULL,
+        state_dtor(&state),
+        "Function 'main' was not defined. Cannot create program entry point.",
+        NULL
     );
 
-    fputs("\t\tcall main\t; Program entry point\n", output);
-    fputs("\t\tpop rdx\t\t; Ignore return status\n", output);
-    fputs("\t\thalt\t\t; Stop program execution\n\n\n", output);
+    // WIP
+    state->tail = state->tail->next = ir_node_new_call(main->ir_list_head);
+    state->tail = state->tail->next = ir_node_new_binary(IR_MOV,
+                                        ir_operand_reg(IR_REG_RDI),
+                                        ir_operand_reg(IR_REG_RAX));
+    state->tail = state->tail->next = ir_node_new_binary(IR_MOV,
+                                        ir_operand_reg(IR_REG_RAX),
+                                        ir_operand_imm(0x3C));  // call exit
+    state->tail = state->tail->next = ir_node_new_syscall();
 
+    
     for (size_t i = 0; i < state.functions.size; i++)
     {
         if (state.functions.data[i].node == NULL)   // stdlib function
             continue;
         STEP_WITH_CLEANUP(
             compile_node(state.functions.data[i].node, &state),
-            state_destroy(&state)
+            state_dtor(&state)
         );
         fputc('\n', output);
     }
 
-    state_destroy(&state);
+    state_dtor(&state);
     return true;
 }
 
