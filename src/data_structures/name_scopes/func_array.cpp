@@ -48,7 +48,10 @@ int func_array_add_func(func_array *functions, const ast_node *func_node)
         arg = arg->right;
     }
 
-    array_push(functions, {.node = func_node, .name = func_node->value.name, .arg_cnt = args});
+    array_push(functions, { .node = func_node,
+                            .ir_list_head = ir_node_new_empty(),
+                            .name = func_node->value.name,
+                            .arg_cnt = args});
 
     return 0;
 }

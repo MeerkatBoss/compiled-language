@@ -2,12 +2,14 @@
 #define FUNC_ARRAY_H
 
 #include "data_structures/ast/ast.h"
+#include "data_structures/intermediate_repr/ir.h"
 
 struct function
 {
     const ast_node* node;
-    const char* name;
-    size_t arg_cnt;
+    ir_node*        ir_list_head;
+    const char*     name;
+    size_t          arg_cnt;
 };
 
 #define ARRAY_ELEMENT function
