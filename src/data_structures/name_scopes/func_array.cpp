@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "util/logger/logger.h"
+#include "data_structures/intermediate_repr/ir_dsl.h"
 #include "func_array.h"
 
 #define ARRAY_ELEMENT function

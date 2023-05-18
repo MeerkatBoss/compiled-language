@@ -30,6 +30,7 @@ enum ir_op
     IR_AND,  IR_OR,
     IR_XOR,  IR_NOT,
 
+    IR_CMP,  IR_TEST,
     IR_JMP,
 
     IR_CALL, IR_RET,
@@ -63,16 +64,10 @@ enum ir_operand_flags
 
 struct ir_operand
 {
-    ir_operand_flags    flags;
-    ir_reg              reg;
-    long                immediate;
+    unsigned flags;
+    ir_reg   reg;
+    long     immediate;
 };
-
-#define ir_operand_reg(reg) \
-    { .flags = IR_OPERAND_REG, .reg = (reg), .immediate = 0 };
-
-#define ir_operand_imm(imm) \
-    { .flags = IR_OPERAND_IMM, .reg = IR_REG_NONE, .immediate = imm };
 
 struct ir_node;
 
@@ -95,11 +90,6 @@ struct ir_node
 
     ir_node_ptr     next;
 };
-
-ir_node* ir_node_new_empty(void);
-ir_node* ir_node_new_call(ir_node_ptr function);
-ir_node* ir_node_new_binary(ir_op operation, ir_operand dest, ir_operand src);
-ir_node* ir_node_new_syscall(void);
 
 /**
  * @brief Print verbose information about IR to specified file
@@ -126,6 +116,21 @@ void ir_list_write(const ir_node* head, FILE* output);
  *
  */
 void ir_list_clear(ir_node* head);
+
+/**
+ * @brief Insert new IR node after specified
+ *
+ * @param[inout] tail	Node to insert after
+ * @param[inout] node	Inserted node
+ *
+ * @return `node`
+ */
+inline ir_node* ir_list_insert_after(ir_node* tail, ir_node* node)
+{
+    node->next = tail->next;
+    tail->next = node;
+    return node;
+}
 
 #define ARRAY_ELEMENT ir_node_ptr
 #include "array/dynamic_array.h"

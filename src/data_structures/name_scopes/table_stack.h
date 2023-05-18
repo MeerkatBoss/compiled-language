@@ -33,6 +33,15 @@ void table_stack_ctor(table_stack* tb_stack);
 void table_stack_dtor(table_stack* tb_stack);
 
 /**
+ * @brief Check whether the outermost scope is global
+ *
+ * @param[inout] tb_stack   Scope stack 
+ *
+ * @return `true` if scope is global, `false` otherwise
+ */
+bool table_stack_is_at_global_scope(table_stack* tb_stack);
+
+/**
  * @brief Retrieve the offset, corresponding to the space after
  * the last stored variable
  *
@@ -81,7 +90,7 @@ inline void table_stack_pop_table(table_stack* tb_stack)
  *
  * @return `true` if variable exists, `false` otherwise
  */
-long table_stack_find_var(const table_stack* tb_stack, const char* name,
+bool table_stack_find_var(const table_stack* tb_stack, const char* name,
                                  bool* is_global, long* addr);
 
 #endif

@@ -35,6 +35,14 @@ void table_stack_dtor(table_stack *tb_stack)
     memset(tb_stack, 0, sizeof(*tb_stack));
 }
 
+bool table_stack_is_at_global_scope(table_stack* tb_stack)
+{
+    LOG_ASSERT(tb_stack->tables.size > 0, return false);
+
+    var_table* last_table = array_back(&tb_stack->tables);
+    return last_table->is_global;
+}
+
 long table_stack_get_next_offset(table_stack* tb_stack)
 {
     LOG_ASSERT(tb_stack->tables.size > 0, return 0);
@@ -43,7 +51,7 @@ long table_stack_get_next_offset(table_stack* tb_stack)
     if (last_table->offset <= 0)
         return 0;
 
-    return last_table->offset + last_table->size * 8;
+    return last_table->offset + last_table->vars.size * 8;
 }
 
 void table_stack_add_table(table_stack *tb_stack, long offset)
@@ -69,7 +77,7 @@ bool table_stack_add_var(table_stack *tb_stack, const char *name)
     if (var_table_find(last_table, name) < last_table->vars.size)
         return false; /* Variable already exists*/
 
-    array_push(last_table, name);
+    array_push(&last_table->vars, name);
 
     return true;
 }

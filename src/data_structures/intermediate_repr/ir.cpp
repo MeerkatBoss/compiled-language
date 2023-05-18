@@ -16,38 +16,6 @@ static inline void delete_element(ARRAY_ELEMENT* element)
 
 #undef ARRAY_ELEMENT
 
-ir_node* ir_node_new_empty(void)
-{
-    return (ir_node*) calloc(1, sizeof(ir_node));
-}
-
-ir_node* ir_node_new_call(ir_node_ptr function)
-{
-    ir_node* node = ir_node_new_empty();
-    node->is_valid = true;
-    node->operation = IR_CALL;
-    node->jump_target = function;
-    return node;
-}
-
-ir_node* ir_node_new_binary(ir_op operation, ir_operand dest, ir_operand src)
-{
-    ir_node* node = ir_node_new_empty();
-    node->is_valid = true;
-    node->operation = operation;
-    node->operand1 = dest;
-    node->operand2 = src;
-    return node;
-}
-
-ir_node* ir_node_new_syscall(void)
-{
-    ir_node* node = ir_node_new_empty();
-    node->is_valid = true;
-    node->operation = IR_SYSCALL;
-    return node;
-}
-
 static void ir_node_dump(const ir_node* node, FILE* output);
 
 void ir_list_dump(ir_node* head, FILE* output)
@@ -60,6 +28,7 @@ void ir_list_dump(ir_node* head, FILE* output)
         current = current->next;
     }
 
+    fputs("[\n", output);
     current = head;
     while (current)
     {
@@ -69,6 +38,7 @@ void ir_list_dump(ir_node* head, FILE* output)
         if (current) fputc(',', output);
         fputc('\n', output);
     }
+    fputs("]\n", output);
 }
 
 void ir_list_write(const ir_node* head, FILE* output)
@@ -102,31 +72,35 @@ static void ir_node_dump(const ir_node* node, FILE* output)
 {
     fputs("{\n", output);
 
-    fprintf(output, "  \"id\" = %zu,\n", node->node_id);
-    fprintf(output, "  \"is_valid\" = \"%s\",\n",
+    fprintf(output, "  \"id\": %zu,\n", node->node_id);
+    fprintf(output, "  \"is_valid\": \"%s\",\n",
                         node->is_valid ? "true" : "false");
 
-    fprintf(output, "  \"operands\" = [\n");
+    fputs("  \"type\": ", output);
+    ir_op_dump(node->operation, output);
+    fputs(",\n", output);
+
+    fprintf(output, "  \"operands\": [\n");
     ir_operand_dump(&node->operand1, output);
     fputs(",\n", output);
     ir_operand_dump(&node->operand2, output);
     fputs("\n  ],\n", output);
 
-    fprintf(output, "  \"cflags\" = ");
+    fprintf(output, "  \"cflags\": ");
     ir_cond_dump(node->flags, output);
     fputs(",\n", output);
 
     if (node->jump_target)
-        fprintf(output, "  \"jump\" = %zu,\n", node->jump_target->node_id);
+        fprintf(output, "  \"jump\": %zu,\n", node->jump_target->node_id);
 
-    fprintf(output, "  \"address\" = %zu,\n", node->addr);
+    fprintf(output, "  \"address\": %zu,\n", node->addr);
     
-    fprintf(output, "  \"length\" = %zu", node->encoded_length);
+    fprintf(output, "  \"length\": %zu", node->encoded_length);
 
     if (node->encoded_length)
     {
         fputs(",\n", output);
-        fputs("  \"bytes\" = \"", output);
+        fputs("  \"bytes\": \"", output);
         for (size_t i = 0; i < node->encoded_length; ++i)
             fprintf(output, "%X", node->bytes[i]);
         fputc('"', output);
@@ -139,6 +113,7 @@ static void ir_op_dump(ir_op operation, FILE* output)
 {
     switch (operation)
     {
+    case IR_NOP:  fputs("\"NOP\"",  output); break;
     case IR_MOV:  fputs("\"MOV\"",  output); break;
     case IR_CMOV: fputs("\"CMOV\"", output); break;
     case IR_PUSH: fputs("\"PUSH\"", output); break;
@@ -155,6 +130,9 @@ static void ir_op_dump(ir_op operation, FILE* output)
     case IR_XOR: fputs("\"XOR\"", output); break;
     case IR_NOT: fputs("\"NOT\"", output); break;
 
+    case IR_CMP:  fputs("\"CMP\"",  output); break;
+    case IR_TEST: fputs("\"TEST\"", output); break;
+
     case IR_JMP:     fputs("\"JMP\"",     output); break;
     case IR_CALL:    fputs("\"CALL\"",    output); break;
     case IR_RET:     fputs("\"RET\"",     output); break;
@@ -170,7 +148,7 @@ static void ir_operand_dump(const ir_operand* operand, FILE* output)
 {
     fputs("    {\n", output);
 
-    fputs("      \"flags\" = \"", output);
+    fputs("      \"flags\": \"", output);
     if (operand->flags & IR_OPERAND_IMM)
         fputc('i', output);
     if (operand->flags & IR_OPERAND_REG)
@@ -181,12 +159,12 @@ static void ir_operand_dump(const ir_operand* operand, FILE* output)
 
     if (operand->flags & IR_OPERAND_REG)
     {
-        fputs(",\n      \"register\" = ", output);
+        fputs(",\n      \"register\": ", output);
         ir_register_dump(operand->reg, output);
     }
 
     if (operand->flags & IR_OPERAND_IMM)
-        fprintf(output, ",\n      \"immediate\" = %ld", operand->immediate);
+        fprintf(output, ",\n      \"immediate\": %ld", operand->immediate);
 
     fputs("\n    }", output);
 }
