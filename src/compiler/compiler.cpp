@@ -703,11 +703,10 @@ define_compile(CONST)
 {
     if (stage != STAGE_COMPILED_RIGHT) return true; // Nothing to do here
 
-    ir_node* push_node = ir_node_new_empty();
-    push_node->is_valid = true;
-    push_node->operation = IR_PUSH;
-    push_node->operand1 = ir_operand_imm((long)(node->value.num*1000));
-    state_add_ir_node(state, push_node);
+    state_add_ir_node(state, ir_node_new_binary(IR_MOV,
+                                ir_operand_reg(IR_REG_RAX),
+                                ir_operand_imm((long)(node->value.num*1000)));
+    state_add_ir_node(state, ir_node_new_push_reg(IR_REG_RAX));
     return true;
 }
 
