@@ -20,6 +20,6 @@
  * @param[inout] ir_list_head	Head of IR list
  *
  */
-void ir_to_binary(ir_node* ir_list_head);
+void ir_to_binary(ir_node* ir_list_head, size_t base_offset);
 
 #endif /* ir_bin_cvt.h */

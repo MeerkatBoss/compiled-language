@@ -1,0 +1,66 @@
+00000000  55                push rbp
+00000001  4889E5            mov rbp,rsp
+00000004  4883EC20          sub rsp,byte +0x20
+00000008  488D7DFE          lea rdi,[rbp-0x2]
+0000000C  C647010A          mov byte [rdi+0x1],0xa
+00000010  488B4510          mov rax,[rbp+0x10]
+00000014  BE0A000000        mov esi,0xa
+00000019  4831C9            xor rcx,rcx
+0000001C  48FFC1            inc rcx
+0000001F  4831D2            xor rdx,rdx
+00000022  48F7FE            idiv rsi
+00000025  80C230            add dl,0x30
+00000028  8817              mov [rdi],dl
+0000002A  48FFCF            dec rdi
+0000002D  48FFC1            inc rcx
+00000030  4885C0            test rax,rax
+00000033  75EA              jnz 0x1f
+00000035  4831FF            xor rdi,rdi
+00000038  48FFC7            inc rdi
+0000003B  4889EE            mov rsi,rbp
+0000003E  4829CE            sub rsi,rcx
+00000041  4889CA            mov rdx,rcx
+00000044  4831C0            xor rax,rax
+00000047  48FFC0            inc rax
+0000004A  0F05              syscall
+0000004C  4883C420          add rsp,byte +0x20
+00000050  5D                pop rbp
+00000051  C3                ret
+00000052  55                push rbp
+00000053  4889E5            mov rbp,rsp
+00000056  4883EC20          sub rsp,byte +0x20
+0000005A  4831FF            xor rdi,rdi
+0000005D  4889E6            mov rsi,rsp
+00000060  BA20000000        mov edx,0x20
+00000065  4831C0            xor rax,rax
+00000068  0F05              syscall
+0000006A  48FFC8            dec rax
+0000006D  7420              jz 0x8f
+0000006F  4889C1            mov rcx,rax
+00000072  4831C0            xor rax,rax
+00000075  4831D2            xor rdx,rdx
+00000078  4889E6            mov rsi,rsp
+0000007B  486BC00A          imul rax,rax,byte +0xa
+0000007F  8A16              mov dl,[rsi]
+00000081  80EA30            sub dl,0x30
+00000084  4801D0            add rax,rdx
+00000087  48FFC6            inc rsi
+0000008A  48FFC9            dec rcx
+0000008D  75EC              jnz 0x7b
+0000008F  4883C420          add rsp,byte +0x20
+00000093  5D                pop rbp
+00000094  C3                ret
+00000095  55                push rbp
+00000096  4889E5            mov rbp,rsp
+00000099  B8E8030000        mov eax,0x3e8
+0000009E  62F2FD087CC8      vpbroadcastq xmm1,rax
+000000A4  62F1FE08E6C9      vcvtqq2pd xmm1,xmm1
+000000AA  F30F7E4510        movq xmm0,[rbp+0x10]
+000000AF  62F1FE08E6C0      vcvtqq2pd xmm0,xmm0
+000000B5  C5F95EC1          vdivpd xmm0,xmm0,xmm1
+000000B9  F20F51C0          sqrtsd xmm0,xmm0
+000000BD  C5F959C1          vmulpd xmm0,xmm0,xmm1
+000000C1  62F1FD087BC0      vcvtpd2qq xmm0,xmm0
+000000C7  66480F7EC0        movq rax,xmm0
+000000CC  5D                pop rbp
+000000CD  C3                ret

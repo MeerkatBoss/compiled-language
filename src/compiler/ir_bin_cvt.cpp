@@ -2,12 +2,12 @@
 
 #include "ir_bin_cvt.h"
 
-static void ir_fill_opcodes(ir_node* ir_list_head);
+static void ir_fill_opcodes(ir_node* ir_list_head, size_t base_offset);
 static void ir_update_jumps(ir_node* ir_list_head);
 
-void ir_to_binary(ir_node* ir_list_head)
+void ir_to_binary(ir_node* ir_list_head, size_t base_offset)
 {
-    ir_fill_opcodes(ir_list_head);
+    ir_fill_opcodes(ir_list_head, base_offset);
     ir_update_jumps(ir_list_head);
 }
 
@@ -76,10 +76,10 @@ static void ir_convert_ret    (ir_node* node);
 static void ir_convert_syscall(ir_node* node);
 
 
-static void ir_fill_opcodes(ir_node* ir_list_head)
+static void ir_fill_opcodes(ir_node* ir_list_head, size_t base_offset)
 {
     ir_node* current = ir_list_head;
-    size_t cur_addr = 0;
+    size_t cur_addr = base_offset;
     while (current)
     {
         switch (current->operation)

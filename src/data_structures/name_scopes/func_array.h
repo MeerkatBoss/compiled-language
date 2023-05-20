@@ -18,7 +18,7 @@ struct function
 
 typedef dynamic_array(function) func_array;
 
-void func_array_ctor(func_array* functions, bool use_stdlib = false);
+void func_array_ctor(func_array* functions);
 
 inline void func_array_dtor(func_array* functions) { array_dtor(functions); }
 

@@ -1,3 +1,8 @@
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 
 #include "util/logger/logger.h"
@@ -26,6 +31,7 @@ struct compilation_state
 
     ir_node_stack   ir_stack;
 
+    ir_node_ptr stdlib;
     ir_node_ptr ir_head;
     ir_node_ptr ir_tail;
     ir_node_ptr func_return;
@@ -35,6 +41,7 @@ static void state_ctor(compilation_state* state, bool use_stdlib);
 static void state_dtor(compilation_state* state);
 static void state_add_ir_node(compilation_state* state, ir_node* node);
 
+static size_t link_stdlib(FILE* output);
 static bool extract_declarations(const ast_node* node, compilation_state* state);
 static bool compile_node        (const ast_node* node, compilation_state* state);
 
@@ -89,8 +96,11 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output,
             state_dtor(&state)
         );
     }
+    size_t base_offset = 0;
+    if (use_stdlib)
+        base_offset = link_stdlib(output);
 
-    ir_to_binary(state.ir_head);
+    ir_to_binary(state.ir_head, base_offset);
     ir_list_write(state.ir_head, output);
     state_dtor(&state);
     return true;
@@ -98,11 +108,31 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output,
 
 static void state_ctor(compilation_state* state, bool use_stdlib)
 {
-    func_array_ctor(&state->functions, use_stdlib);
+    func_array_ctor(&state->functions);
     table_stack_ctor(&state->name_scope);
     ir_stack_ctor(&state->ir_stack);
 
-    state->ir_head = ir_node_new_empty();
+    state->stdlib = ir_node_new_empty();
+    ir_node* stdlib_tail = state->stdlib;
+    if (use_stdlib)
+    {
+        ir_node* print = ir_node_new_empty();
+        print->addr    = 0;
+        array_push(&state->functions, { NULL, print, "print", 1 });
+        stdlib_tail = ir_list_insert_after(stdlib_tail, print);
+
+        ir_node* read  = ir_node_new_empty();
+        read->addr    = 0x52;
+        array_push(&state->functions, { NULL, read, "read", 0 });
+        stdlib_tail = ir_list_insert_after(stdlib_tail, read);
+
+        ir_node* sqrt = ir_node_new_empty();
+        sqrt->addr    = 0x95;
+        array_push(&state->functions, { NULL, sqrt, "sqrt", 1 });
+        stdlib_tail = ir_list_insert_after(stdlib_tail, sqrt);
+    }
+
+    state->ir_head = stdlib_tail;
     state->ir_tail = state->ir_head;
 }
 
@@ -111,7 +141,7 @@ static void state_dtor(compilation_state* state)
     func_array_dtor(&state->functions);
     table_stack_dtor(&state->name_scope);
     ir_stack_dtor(&state->ir_stack);
-    ir_list_clear(state->ir_head);
+    ir_list_clear(state->stdlib);
 
     if (state->func_return) free(state->func_return);
     state = {};
@@ -122,6 +152,20 @@ static void state_add_ir_node(compilation_state* state, ir_node* node)
     state->ir_tail = ir_list_insert_after(state->ir_tail, node);
 }
 
+static size_t link_stdlib(FILE* output)
+{
+    int fd = open("assets/stdlib.bin", O_RDONLY);
+    struct stat file_stat = {};
+    fstat(fd, &file_stat);
+    size_t file_size = file_stat.st_size;
+
+    void* mapped = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
+
+    fwrite(mapped, 1, file_size, output);
+    munmap(mapped, file_size);
+    return file_size;
+}
 
 bool extract_declarations(const ast_node *node, compilation_state *state)
 {
