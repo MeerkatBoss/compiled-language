@@ -24,7 +24,8 @@ void table_stack_ctor(table_stack *tb_stack)
     tb_stack->var_cnt = 0;
 
     var_table global = {};
-    var_table_ctor(&global, 0, true);
+    // TODO: Extract
+    var_table_ctor(&global, 0x401000, true);
 
     array_push(&tb_stack->tables, global);
 }

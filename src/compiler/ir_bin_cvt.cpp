@@ -244,7 +244,7 @@ static void ir_convert_mov(ir_node* node)
         if (node->operand1.flags == IR_OPERAND_REG)
         {
             node->bytes[0] |= encode_reg_hi(node->operand1.reg) * REX_B;
-            node->bytes[1] |= 0xB8 | encode_reg_lo(node->operand2.reg);
+            node->bytes[1] |= 0xB8 | encode_reg_lo(node->operand1.reg);
             imm_start = 2;
         }
         else
@@ -295,12 +295,12 @@ static void ir_convert_cmov(ir_node* node)
     if (node->operand1.flags == IR_OPERAND_REG &&
             node->operand2.flags == IR_OPERAND_REG) // Between registers
     {
-        node->bytes[0] |= encode_reg_pair_rex(node->operand1.reg,
-                                              node->operand2.reg);
+        node->bytes[0] |= encode_reg_pair_rex(node->operand2.reg,
+                                              node->operand1.reg);
         node->bytes[1] = 0x0F;
         node->bytes[2] = 0x40 | encode_cond(node->flags);
-        node->bytes[3] = encode_reg_pair_mod(node->operand1.reg,
-                                             node->operand2.reg);
+        node->bytes[3] = encode_reg_pair_mod(node->operand2.reg,
+                                             node->operand1.reg);
         node->encoded_length = 4;
         return;
     }
@@ -506,12 +506,12 @@ static void ir_convert_mul(ir_node* node)
     if (node->operand1.flags == IR_OPERAND_REG &&
             node->operand2.flags == IR_OPERAND_REG) // MUL registers
     {
-        node->bytes[0] |= encode_reg_pair_rex(node->operand1.reg,
-                                              node->operand2.reg);
+        node->bytes[0] |= encode_reg_pair_rex(node->operand2.reg,
+                                              node->operand1.reg);
         node->bytes[1] = 0x0F;
         node->bytes[2] = 0xAF;
-        node->bytes[3] = encode_reg_pair_mod(node->operand1.reg,
-                                             node->operand2.reg);
+        node->bytes[3] = encode_reg_pair_mod(node->operand2.reg,
+                                             node->operand1.reg);
         node->encoded_length = 4;
         return;
     }
@@ -520,9 +520,10 @@ static void ir_convert_mul(ir_node* node)
     {
         node->bytes[0] |= encode_reg_hi(node->operand1.reg) * REX_B;
         node->bytes[1] = 0x69;
-        node->bytes[2] |= 0xE8 | encode_reg_lo(node->operand1.reg);
-        memcpy(node->bytes + 3, &node->operand1.immediate, 8);
-        node->encoded_length = 12;
+        unsigned char reg = encode_reg_lo(node->operand1.reg);
+        node->bytes[2] |= 0xC0 | (reg << 3) | reg;
+        memcpy(node->bytes + 3, &node->operand1.immediate, 4);
+        node->encoded_length = 7;
         return;
     }
 
@@ -550,7 +551,7 @@ static void ir_convert_div(ir_node* node)
     if (node->operand1.flags == IR_OPERAND_REG)
     {
         node->bytes[0] |= encode_reg_hi(node->operand1.reg) * REX_B;
-        node->bytes[2] |= 0xC | encode_reg_lo(node->operand1.reg);
+        node->bytes[2] |= 0xC0 | encode_reg_lo(node->operand1.reg);
         node->encoded_length = 3;
         return;
     }
@@ -572,7 +573,7 @@ static void ir_convert_neg(ir_node* node)
     if (node->operand1.flags == IR_OPERAND_REG)
     {
         node->bytes[0] |= encode_reg_hi(node->operand1.reg) * REX_B;
-        node->bytes[2] |= 0xC | encode_reg_lo(node->operand1.reg);
+        node->bytes[2] |= 0xC0 | encode_reg_lo(node->operand1.reg);
         node->encoded_length = 3;
         return;
     }
@@ -686,7 +687,7 @@ static void ir_convert_or(ir_node* node)
     {
         node->bytes[0] |= encode_reg_pair_rex(node->operand1.reg,
                                               node->operand2.reg);
-        node->bytes[1] = 0x21;
+        node->bytes[1] = 0x09;
         node->bytes[2] = encode_reg_pair_mod(node->operand1.reg,
                                              node->operand2.reg);
         node->encoded_length = 3;
@@ -753,7 +754,7 @@ static void ir_convert_xor(ir_node* node)
     {
         node->bytes[0] |= encode_reg_pair_rex(node->operand1.reg,
                                               node->operand2.reg);
-        node->bytes[1] = 0x33;
+        node->bytes[1] = 0x31;
         node->bytes[2] = encode_reg_pair_mod(node->operand1.reg,
                                              node->operand2.reg);
         node->encoded_length = 3;
@@ -795,7 +796,7 @@ static void ir_convert_not(ir_node* node)
     if (node->operand1.flags == IR_OPERAND_REG)
     {
         node->bytes[0] |= encode_reg_hi(node->operand1.reg) * REX_B;
-        node->bytes[2] |= 0xC | encode_reg_lo(node->operand1.reg);
+        node->bytes[2] |= 0xC0 | encode_reg_lo(node->operand1.reg);
         node->encoded_length = 3;
         return;
     }
@@ -842,7 +843,7 @@ static void ir_convert_cmp(ir_node* node)
     {
         node->bytes[0] |= encode_reg_pair_rex(node->operand1.reg,
                                               node->operand2.reg);
-        node->bytes[1] = 0x3B;
+        node->bytes[1] = 0x39;
         node->bytes[2] = encode_reg_pair_mod(node->operand1.reg,
                                              node->operand2.reg);
         node->encoded_length = 3;

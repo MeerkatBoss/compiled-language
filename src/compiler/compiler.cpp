@@ -1,3 +1,4 @@
+#include <elf.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,10 +38,19 @@ struct compilation_state
     ir_node_ptr func_return;
 };
 
+static const char sect_name_table[] = {
+    '\0',
+    '.', 't', 'e', 'x', 't', '\0',
+    '.', 'b', 's', 's', '\0',
+    '.', 's', 't', 'r', 't', 'a', 'b', '\0'
+};
+
 static void state_ctor(compilation_state* state, bool use_stdlib);
 static void state_dtor(compilation_state* state);
 static void state_add_ir_node(compilation_state* state, ir_node* node);
 
+static void add_elf_headers(FILE* output, compilation_state* state);
+static void add_elf_sections(FILE* output, compilation_state* state);
 static size_t link_stdlib(FILE* output);
 static bool extract_declarations(const ast_node* node, compilation_state* state);
 static bool compile_node        (const ast_node* node, compilation_state* state);
@@ -96,12 +106,19 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output,
             state_dtor(&state)
         );
     }
-    size_t base_offset = 0;
-    if (use_stdlib)
-        base_offset = link_stdlib(output);
+    size_t base_offset = 0x4000CE;  // Default for 64-bit
 
+    // TODO: EXTRAAAAAAAAAAAAAAAAAAAAAAAAAAAAACT
     ir_to_binary(state.ir_head, base_offset);
+    add_elf_headers(output, &state);
+    fseek(output, 0x1000, SEEK_SET);
+    link_stdlib(output);    // TODO: make optional
     ir_list_write(state.ir_head, output);
+    fseek(output, 0x2000, SEEK_SET);
+    fwrite(sect_name_table, sizeof(sect_name_table), 1, output);
+    add_elf_sections(output, &state);
+
+    ir_list_dump(state.ir_head, stdout);
     state_dtor(&state);
     return true;
 }
@@ -117,19 +134,21 @@ static void state_ctor(compilation_state* state, bool use_stdlib)
     if (use_stdlib)
     {
         ir_node* print = ir_node_new_empty();
-        print->addr    = 0;
+        print->addr    = 0x400000;
         array_push(&state->functions, { NULL, print, "print", 1 });
         stdlib_tail = ir_list_insert_after(stdlib_tail, print);
 
         ir_node* read  = ir_node_new_empty();
-        read->addr    = 0x52;
+        read->addr     = 0x400052;
         array_push(&state->functions, { NULL, read, "read", 0 });
         stdlib_tail = ir_list_insert_after(stdlib_tail, read);
 
-        ir_node* sqrt = ir_node_new_empty();
-        sqrt->addr    = 0x95;
+        ir_node* sqrt  = ir_node_new_empty();
+        sqrt->addr     = 0x400095;
         array_push(&state->functions, { NULL, sqrt, "sqrt", 1 });
         stdlib_tail = ir_list_insert_after(stdlib_tail, sqrt);
+        
+        stdlib_tail = ir_list_insert_after(stdlib_tail, ir_node_new_empty());
     }
 
     state->ir_head = stdlib_tail;
@@ -150,6 +169,109 @@ static void state_dtor(compilation_state* state)
 static void state_add_ir_node(compilation_state* state, ir_node* node)
 {
     state->ir_tail = ir_list_insert_after(state->ir_tail, node);
+}
+
+static void add_elf_headers(FILE* output, compilation_state* state)
+{
+    size_t entry_addr = state->ir_head->addr;
+    size_t code_size = state->ir_tail->addr + state->ir_tail->encoded_length
+                        - 0x400000;
+    Elf64_Ehdr elf_header = {
+        .e_ident = {
+            ELFMAG0, ELFMAG1, ELFMAG2, ELFMAG3,
+            ELFCLASS64,
+            ELFDATA2LSB,
+            EV_CURRENT,
+            ELFOSABI_SYSV,
+            0
+        },
+        .e_type = ET_EXEC,
+        .e_machine = EM_X86_64,
+        .e_version = EV_CURRENT,
+        .e_entry = entry_addr,
+        .e_phoff = sizeof(Elf64_Ehdr),
+        .e_shoff = 0x2000 + sizeof(sect_name_table),
+        .e_flags = 0,
+        .e_ehsize = sizeof(Elf64_Ehdr),
+        .e_phentsize = sizeof(Elf64_Phdr),
+        .e_phnum = 2,
+        .e_shentsize = sizeof(Elf64_Shdr),
+        .e_shnum = 4,
+        .e_shstrndx = 3
+    };
+
+
+    Elf64_Phdr load_exec = {
+        .p_type = PT_LOAD,
+        .p_flags = PF_R | PF_X,
+        .p_offset = 0x1000,
+        .p_vaddr = 0x400000,
+        .p_paddr = 0x400000,
+        .p_filesz = code_size,
+        .p_memsz = code_size,
+        .p_align = 0x1000
+    };
+    Elf64_Phdr load_write = {
+        .p_type = PT_LOAD,
+        .p_flags = PF_R | PF_W,
+        .p_offset = 0x2000,
+        .p_vaddr = 0x401000,
+        .p_paddr = 0x401000,
+        .p_filesz = sizeof(sect_name_table),
+        .p_memsz = state->global_var_cnt * 8 + sizeof(sect_name_table),
+        .p_align = 0x1000
+    };
+
+    fwrite(&elf_header, sizeof(elf_header), 1, output);
+    fwrite(&load_exec,  sizeof(load_exec),  1, output);
+    fwrite(&load_write, sizeof(load_write), 1, output);
+}
+
+static void add_elf_sections(FILE* output, compilation_state* state)
+{
+    size_t code_size = state->ir_tail->addr + state->ir_tail->encoded_length
+                        - 0x400000;
+    Elf64_Shdr rzvd = {};
+    Elf64_Shdr text = {
+        .sh_name = 1,
+        .sh_type = SHT_PROGBITS,
+        .sh_flags = SHF_ALLOC | SHF_EXECINSTR,
+        .sh_addr = 0x400000,
+        .sh_offset = 0x1000,
+        .sh_size = code_size,
+        .sh_link = 0,
+        .sh_info = 0,
+        .sh_addralign = 0x10,
+        .sh_entsize = 0
+    };
+    Elf64_Shdr bss = {
+        .sh_name = 7,
+        .sh_type = SHT_NOBITS,
+        .sh_flags = SHF_WRITE | SHF_ALLOC,
+        .sh_addr = 0x401000,
+        .sh_offset = 0x2000,
+        .sh_size = state->global_var_cnt * 8,
+        .sh_link = 0,
+        .sh_info = 0,
+        .sh_addralign = 0x8,
+        .sh_entsize = 0
+    };
+    Elf64_Shdr strtab = {
+        .sh_name = 12,
+        .sh_type = SHT_STRTAB,
+        .sh_flags = 0,
+        .sh_addr = 0x401000 + state->global_var_cnt * 8,
+        .sh_offset = 0x2000,
+        .sh_size = sizeof(sect_name_table),
+        .sh_link = 0,
+        .sh_info = 0,
+        .sh_addralign = 0x8,
+        .sh_entsize = 0
+    };
+    fwrite(&rzvd,   sizeof(Elf64_Shdr), 1, output);
+    fwrite(&text,   sizeof(Elf64_Shdr), 1, output);
+    fwrite(&bss,    sizeof(Elf64_Shdr), 1, output);
+    fwrite(&strtab, sizeof(Elf64_Shdr), 1, output);
 }
 
 static size_t link_stdlib(FILE* output)
@@ -466,23 +588,9 @@ define_compile(OP)
         const ir_operand stack_top = {.flags = IR_OPERAND_REG | IR_OPERAND_MEM,
                                       .reg   = IR_REG_RSP };
 
-        state_add_ir_node(state, ir_node_new_binary(IR_MOV,
-                                                ir_operand_reg(IR_REG_RBX),
-                                                ir_operand_imm(1)));
-        state_add_ir_node(state, ir_node_new_binary(IR_XOR,
-                                                ir_operand_reg(IR_REG_RAX),
-                                                ir_operand_reg(IR_REG_RAX)));
-        state_add_ir_node(state, ir_node_new_binary(IR_TEST,
-                                                stack_top,
-                                                ir_operand_imm(-1)));
-        ir_node* cmov = ir_node_new_binary(IR_CMOV,
-                                                ir_operand_reg(IR_REG_RAX),
-                                            ir_operand_reg(IR_REG_RBX));
-        cmov->flags = IR_COND_NOT_EQUAL;
-        state_add_ir_node(state, cmov);
-        state_add_ir_node(state, ir_node_new_binary(IR_MOV,
-                                                stack_top,
-                                                ir_operand_reg(IR_REG_RAX)));
+        state_add_ir_node(state, ir_node_new_binary(IR_NOT, stack_top, {}));
+        state_add_ir_node(state, ir_node_new_binary(IR_AND, stack_top,
+                                                    ir_operand_imm(1)));
         return true;
     }
 
@@ -566,9 +674,7 @@ define_compile(OP)
 define_compile(SEQ)
 {
     if (stage == STAGE_COMPILED_LEFT && node->left->type == NODE_CALL)
-    {
         memset(state->ir_tail, 0, sizeof(*state->ir_tail));
-    }
     return true;    // Nothing to do here
 }
 
@@ -602,6 +708,8 @@ define_compile(ASS)
 
 define_compile(WHILE)
 {
+    if (stage == STAGE_COMPILED_LEFT && node->left->type == NODE_CALL)
+        memset(state->ir_tail, 0, sizeof(*state->ir_tail));
     ir_node* start_node = NULL;
     ir_node* jmp_node = NULL;
     ir_node* end_node = NULL;
@@ -633,6 +741,7 @@ define_compile(WHILE)
         jmp_node->jump_target = end_node;       // Set target for start jump
 
         start_node = ir_stack_top(&state->ir_stack);
+        ir_stack_pop(&state->ir_stack);
         jmp_node = ir_node_new_empty();
         jmp_node->is_valid = true;
         jmp_node->operation = IR_JMP;
@@ -656,6 +765,11 @@ define_compile(IF)
 
 define_compile(BRANCH)
 {
+    if (stage == STAGE_COMPILED_LEFT && node->left->type == NODE_CALL)
+        memset(state->ir_tail, 0, sizeof(*state->ir_tail));
+    if (stage == STAGE_COMPILED_RIGHT && node->right &&
+            node->right->type == NODE_CALL)
+        memset(state->ir_tail, 0, sizeof(*state->ir_tail));
     ir_node* jmp_node = NULL;
     ir_node* else_node = NULL;
     ir_node* end_node = NULL;
@@ -692,6 +806,7 @@ define_compile(BRANCH)
     case STAGE_COMPILED_RIGHT:
         end_node = ir_node_new_empty();
         jmp_node = ir_stack_top(&state->ir_stack);
+        ir_stack_pop(&state->ir_stack);
         jmp_node->jump_target = end_node;       // Set jump target to skip
                                                 // 'else' branch
         state_add_ir_node(state, end_node);
