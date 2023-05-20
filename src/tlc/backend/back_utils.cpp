@@ -34,9 +34,5 @@ bool compile_tree_to_file(const abstract_syntax_tree *tree, const char *filename
 
     LOG_ASSERT(success, return false);
 
-    FILE* shell = popen("/bin/sh", "w");
-    if (use_stdlib) fprintf(shell, "cat assets/stdlib.asm >> %s\n", filename);
-    pclose(shell);
-
     return true;
 }

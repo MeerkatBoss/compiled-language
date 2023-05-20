@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "util/logger/logger.h"
 
 #include "data_structures/name_scopes/table_stack.h"
@@ -5,6 +7,7 @@
 #include "data_structures/intermediate_repr/ir.h"
 #include "data_structures/intermediate_repr/ir_dsl.h"
 
+#include "ir_bin_cvt.h"
 #include "compiler.h"
 
 inline long max_long(long a, long b) { return a > b ? a : b; }
@@ -87,7 +90,8 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output,
         );
     }
 
-    ir_list_dump(state.ir_head, output);
+    ir_to_binary(state.ir_head);
+    ir_list_write(state.ir_head, output);
     state_dtor(&state);
     return true;
 }
@@ -517,6 +521,10 @@ define_compile(OP)
 
 define_compile(SEQ)
 {
+    if (stage == STAGE_COMPILED_LEFT && node->left->type == NODE_CALL)
+    {
+        memset(state->ir_tail, 0, sizeof(*state->ir_tail));
+    }
     return true;    // Nothing to do here
 }
 
@@ -705,7 +713,7 @@ define_compile(CONST)
 
     state_add_ir_node(state, ir_node_new_binary(IR_MOV,
                                 ir_operand_reg(IR_REG_RAX),
-                                ir_operand_imm((long)(node->value.num*1000)));
+                                ir_operand_imm((long)(node->value.num*1000))));
     state_add_ir_node(state, ir_node_new_push_reg(IR_REG_RAX));
     return true;
 }

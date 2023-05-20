@@ -102,7 +102,7 @@ static void ir_node_dump(const ir_node* node, FILE* output)
         fputs(",\n", output);
         fputs("  \"bytes\": \"", output);
         for (size_t i = 0; i < node->encoded_length; ++i)
-            fprintf(output, "%X", node->bytes[i]);
+            fprintf(output, "%02X ", node->bytes[i]);
         fputc('"', output);
     }
 
