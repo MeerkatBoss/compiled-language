@@ -118,7 +118,7 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output,
     fwrite(sect_name_table, sizeof(sect_name_table), 1, output);
     add_elf_sections(output, &state);
 
-    ir_list_dump(state.ir_head, stdout);
+    // ir_list_dump(state.ir_head, stdout);
     state_dtor(&state);
     return true;
 }
@@ -449,11 +449,13 @@ define_compile(NFUN)
             state->func_name = node->value.name;
             state->has_return = false;
             state->stack_frame_size = 0;
-
-            // Function arguments in separate scope, starting at [rbp+16]
-            table_stack_add_table(&state->name_scope, -16);
-
             self = func_array_find_func(&state->functions, state->func_name);
+
+            // Function arguments in separate scope, starting at
+            // [rbp+8+8*argcnt]
+            table_stack_add_table(&state->name_scope,
+                                    -8 - 8 * self->arg_cnt);
+
             
             // Add root node for others to reference
             state_add_ir_node(state, self->ir_list_head);

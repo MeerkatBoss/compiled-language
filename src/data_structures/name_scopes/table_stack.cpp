@@ -93,9 +93,7 @@ bool table_stack_find_var(const table_stack* tb_stack, const char* name,
         if (index < cur_table->vars.size)
         {
             *is_global = cur_table->is_global;
-            long offset = cur_table->offset + (cur_table->offset < 0
-                                                ? -(long)index*8
-                                                :  (long)index*8);
+            long offset = cur_table->offset + index*8;
             *addr = offset;
             return true;
         }

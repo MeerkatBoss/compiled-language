@@ -95,14 +95,14 @@
                 {},
                 {
                   OP,
-                  DIV,
+                  NEG,
+                  {},
                   {
                     OP,
-                    NEG,
-                    {},
-                    { VAR, b, {}, {} }
-                  },
-                  { VAR, k, {}, {} }
+                    DIV,
+                    { VAR, b, {}, {} },
+                    { VAR, k, {}, {} }
+                  }
                 }
               },
               {
@@ -237,18 +237,18 @@
                             {},
                             {
                               OP,
-                              DIV,
+                              NEG,
+                              {},
                               {
                                 OP,
-                                NEG,
-                                {},
-                                { VAR, b, {}, {} }
-                              },
-                              {
-                                OP,
-                                MUL,
-                                { CONST, 2.000, {}, {} },
-                                { VAR, a, {}, {} }
+                                DIV,
+                                { VAR, b, {}, {} },
+                                {
+                                  OP,
+                                  MUL,
+                                  { CONST, 2.000, {}, {} },
+                                  { VAR, a, {}, {} }
+                                }
                               }
                             }
                           },
@@ -320,23 +320,23 @@
                           {},
                           {
                             OP,
-                            DIV,
+                            NEG,
+                            {},
                             {
                               OP,
-                              SUB,
+                              DIV,
                               {
                                 OP,
-                                NEG,
-                                {},
-                                { VAR, b, {}, {} }
+                                ADD,
+                                { VAR, b, {}, {} },
+                                { VAR, discrmant, {}, {} }
                               },
-                              { VAR, discrmant, {}, {} }
-                            },
-                            {
-                              OP,
-                              MUL,
-                              { CONST, 2.000, {}, {} },
-                              { VAR, a, {}, {} }
+                              {
+                                OP,
+                                MUL,
+                                { CONST, 2.000, {}, {} },
+                                { VAR, a, {}, {} }
+                              }
                             }
                           }
                         },
@@ -352,14 +352,9 @@
                               DIV,
                               {
                                 OP,
-                                ADD,
-                                {
-                                  OP,
-                                  NEG,
-                                  {},
-                                  { VAR, b, {}, {} }
-                                },
-                                { VAR, discrmant, {}, {} }
+                                SUB,
+                                { VAR, discrmant, {}, {} },
+                                { VAR, b, {}, {} }
                               },
                               {
                                 OP,
@@ -544,17 +539,7 @@
                               {
                                 PAR,
                                 NULL,
-                                {
-                                  CALL,
-                                  print,
-                                  {},
-                                  {
-                                    PAR,
-                                    NULL,
-                                    { CONST, 999.999, {}, {} },
-                                    {}
-                                  }
-                                },
+                                { CONST, 999.999, {}, {} },
                                 {}
                               }
                             }
