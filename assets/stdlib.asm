@@ -12,7 +12,11 @@ print_num:	push		rbp
 
 		xor		rcx,		rcx		; Total char count in rcx
 		inc		rcx
-		
+
+		cmp		rax,		0
+		jge		.fill_chars
+		imul		rax,		rax,		-1
+
 .fill_chars:	xor		rdx,		rdx
 		idiv		rsi
 
@@ -24,8 +28,13 @@ print_num:	push		rbp
 		test		rax,		rax
 		jnz		.fill_chars
 
+		cmp	QWORD	[rbp + 16],	0
+		jge		.print
+		mov	BYTE	[rdi],		0x2D		; '-'
+		dec		rdi
+		inc		rcx
 
-		xor		rdi,		rdi
+.print		xor		rdi,		rdi
 		inc		rdi				; rdi = 1 (stdout)
 		mov		rsi,		rbp
 		sub		rsi,		rcx		; buf addr in rsi
@@ -53,10 +62,17 @@ read_num:	push		rbp
 		dec		rax
 		jz		.end
 
-		mov		rcx,		rax
-		xor		rax,		rax
-		xor		rdx,		rdx
-		mov		rsi,		rsp
+		mov		rdi,		1		; sign in rdi
+		mov		rcx,		rax		; char count in rcx
+		xor		rax,		rax		; result in rax
+		xor		rdx,		rdx		; zero-out rdx
+		mov		rsi,		rsp		; start of buffer in rsi
+		
+		cmp	BYTE	[rsi],		0x2D		; '-'
+		jne		.convert_num
+		mov		rdi,		-1
+		inc		rsi
+		dec		rcx
 
 .convert_num:	imul		rax,		rax,		10
 		mov		dl,	BYTE	[rsi]
@@ -66,6 +82,8 @@ read_num:	push		rbp
 		inc		rsi
 		dec		rcx
 		jnz		.convert_num
+
+		imul		rax,		rdi
 
 .end:		add		rsp,		32
 		pop		rbp

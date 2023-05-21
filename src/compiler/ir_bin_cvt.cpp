@@ -522,7 +522,7 @@ static void ir_convert_mul(ir_node* node)
         node->bytes[1] = 0x69;
         unsigned char reg = encode_reg_lo(node->operand1.reg);
         node->bytes[2] |= 0xC0 | (reg << 3) | reg;
-        memcpy(node->bytes + 3, &node->operand1.immediate, 4);
+        memcpy(node->bytes + 3, &node->operand2.immediate, 4);
         node->encoded_length = 7;
         return;
     }
@@ -545,23 +545,26 @@ static void ir_convert_mul(ir_node* node)
 static void ir_convert_div(ir_node* node)
 {
     node->bytes[0] = REX | REX_W;
-    node->bytes[1] = 0xF7;
-    node->bytes[2] = 0x38;
+    node->bytes[1] = 0x99;          // CQO
+    
+    node->bytes[2] = REX | REX_W;
+    node->bytes[3] = 0xF7;
+    node->bytes[4] = 0x38;
 
     if (node->operand1.flags == IR_OPERAND_REG)
     {
-        node->bytes[0] |= encode_reg_hi(node->operand1.reg) * REX_B;
-        node->bytes[2] |= 0xC0 | encode_reg_lo(node->operand1.reg);
-        node->encoded_length = 3;
+        node->bytes[2] |= encode_reg_hi(node->operand1.reg) * REX_B;
+        node->bytes[4] |= 0xC0 | encode_reg_lo(node->operand1.reg);
+        node->encoded_length = 5;
         return;
     }
 
-    node->bytes[0] |= encode_mem_rex(node->operand1);
-    node->bytes[2] |= encode_mem_mod(node->operand1);
-    node->bytes[3]  = encode_mem_sib(node->operand1);
+    node->bytes[2] |= encode_mem_rex(node->operand1);
+    node->bytes[4] |= encode_mem_mod(node->operand1);
+    node->bytes[5]  = encode_mem_sib(node->operand1);
     int offset = (int) node->operand1.immediate;
     memcpy(node->bytes + 4, &offset, 4);
-    node->encoded_length = 8;
+    node->encoded_length = 10;
 }
 
 static void ir_convert_neg(ir_node* node)

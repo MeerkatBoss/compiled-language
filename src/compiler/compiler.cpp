@@ -106,7 +106,7 @@ bool compiler_tree_to_asm(const abstract_syntax_tree *tree, FILE *output,
             state_dtor(&state)
         );
     }
-    size_t base_offset = 0x4000CE;  // Default for 64-bit
+    size_t base_offset = 0x400103;  // Default for 64-bit + stdlib size
 
     // TODO: EXTRAAAAAAAAAAAAAAAAAAAAAAAAAAAAACT
     ir_to_binary(state.ir_head, base_offset);
@@ -139,12 +139,12 @@ static void state_ctor(compilation_state* state, bool use_stdlib)
         stdlib_tail = ir_list_insert_after(stdlib_tail, print);
 
         ir_node* read  = ir_node_new_empty();
-        read->addr     = 0x400052;
+        read->addr     = 0x40006c;
         array_push(&state->functions, { NULL, read, "read", 0 });
         stdlib_tail = ir_list_insert_after(stdlib_tail, read);
 
         ir_node* sqrt  = ir_node_new_empty();
-        sqrt->addr     = 0x400095;
+        sqrt->addr     = 0x4000CA;
         array_push(&state->functions, { NULL, sqrt, "sqrt", 1 });
         stdlib_tail = ir_list_insert_after(stdlib_tail, sqrt);
         
