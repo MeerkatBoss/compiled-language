@@ -17,7 +17,7 @@ To use the TypoLang compiler (tlc) you need to:
 
 1. Clone this repo from Github
     ```bash
-    $ git clone https://github.com/MeerkatBoss/compiled-language/tree/binary_compiler
+    $ git clone https://github.com/MeerkatBoss/compiled-language
     $ cd compiled-language
     ```
 2. Checkout to 'binary_compiler' branch
