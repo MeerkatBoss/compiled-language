@@ -24,7 +24,7 @@ a list of function parameters separated by `,` operator. List of function
 parameters **must** be enclosed between `(` and `0`. List of function parameters
 can be empty. Parameters are defined with `var` keyword followed by parameter
 name. Function declaration **must** be followed by function body: a
-[block statement](#statements). Function body scope is nested in function
+[block statement](#statements). Function body [scope](#scopes) is nested in function
 parameter scope. Function parameters are treated as if they were regular
 variables.
 
@@ -81,11 +81,10 @@ produce a value.
 ### TypoLang Operators
 
 - **Arithmetic:**
-  - Binary infix operators:
-        - `+`           - addition
-        - `-`           - subtraction
-        - `8`           - multiplication
-        - `/`           - division
+  - Addition: `+`
+  - Subtraction: `-`
+  - Multiplication: `8`
+  - Division: `/`
   - Unary negation: `-`
 - **Grouping:** `(` and `0`
 - **Logic:**
