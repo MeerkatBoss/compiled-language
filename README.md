@@ -3,7 +3,7 @@ C-like compiled programming language for people writing code with frequent typos
 
 ## Language guide
 
-You can read TypoLang language guide [here](GUIDE.md)
+You can read TypoLang language guide [here](GUIDE.md).
 
 ## Interoperability with other languages
 This language supports saving its syntax tree in format, specified by
@@ -20,7 +20,7 @@ To use the TypoLang compiler (tlc) you need to:
     $ git clone https://github.com/MeerkatBoss/compiled-language/tree/binary_compiler
     $ cd compiled-language
     ```
-2. Checkout to 'binary_compiler' branch
+2. Checkout to `binary_compiler` branch
     ```bash
     $ git checkout binary_compiler
     ```
@@ -87,7 +87,7 @@ optimizations of bytecode based on analysis of nearby IR entries.
 
 ELF (Executable and Linking Format) requires:
 
-1. *ELF file header*, containing general information about file
+1. *ELF file header*, containing general information about file:
 ```c
 #define EI_NIDENT 16
 typedef struct {
@@ -125,7 +125,8 @@ typedef struct {
 } Elf64_Phdr;
 ```
 
-3. Zero or more *section headers*, describing sections serving different purpose
+3. Zero or more *section headers*, describing sections serving different
+    purpose:
 ```c
 typedef struct {
     uint32_t   sh_name;     // Index of section name in .strtab
