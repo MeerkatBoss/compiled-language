@@ -1,11 +1,42 @@
 # TypoLang
 C-like compiled programming language for people writing code with frequent typos.
 
+## Language guide
+
+You can read TypoLang language guide [here](GUIDE.md)
+
 ## Interoperability with other languages
 This language supports saving its syntax tree in format, specified by
 [AST file standard](
 https://github.com/MeerkatBoss/ast-standard/blob/master/README.md). This allows
 reverse compilation to and from TypoLang, using AST file as an intermediate.
+
+## Usage
+
+To use the TypoLang compiler (tlc) you need to:
+
+1. Clone this repo from Github
+    ```bash
+    $ git clone https://github.com/MeerkatBoss/compiled-language/tree/binary_compiler
+    $ cd compiled-language
+    ```
+2. Checkout to 'binary_compiler' branch
+    ```bash
+    $ git checkout binary_compiler
+    ```
+3. Build `tlc` with GNU Make
+    ```bash
+    $ make all
+    ```
+4. Run `tlc` using GNU Make
+    ```bash
+    $ make run_frontend ARGS="<argument list>"
+    $ make run_midend ARGS="<argument list>"
+    $ make run_backend ARGS="<argument list>"
+    ```
+
+Information about command-line arguments of frontend, mid-end, and backend
+compilers can be obtained by passing "--help" or  "-h" argument to them.
 
 ## Technical details
 
@@ -64,9 +95,9 @@ typedef struct {
     uint16_t      e_type;               // File type (ET_EXEC)
     uint16_t      e_machine;            // Machine info (EM_X86_64)
     uint32_t      e_version;            // ELF version (EV_CURRENT)
-    Elf64_Addr     e_entry;             // Entry address (for executable files)
-    Elf64_Off      e_phoff;             // File offset of first program header
-    Elf64_Off      e_shoff;             // File offset of first section header
+    Elf64_Addr    e_entry;              // Entry address (for executable files)
+    Elf64_Off     e_phoff;              // File offset of first program header
+    Elf64_Off     e_shoff;              // File offset of first section header
     uint32_t      e_flags;              // Processor-specific flags (undefined)
     uint16_t      e_ehsize;             // Size of ELF header
     uint16_t      e_phentsize;          // Size of program headers
@@ -112,14 +143,15 @@ typedef struct {
 ```
 
 The ELF file produced by TypoLang backend compiler contains two segments of type
-LOAD, which are loaded into memory upon execution. The first segment can be
-read and executed and contains produced binary code. The second one can be read
-from an written to and contains space reserved global variables.
+LOAD, which are loaded into memory before execution. The first segment can be
+read and executed and contains binary code. The second one can be read from and
+written to and contains space reserved for global variables.
 
-Produced ELF file contains four sections. The first one is empty and is required
-by ELF standard. The second one is the `.text` section, containing executable
-code. This section is contained within the first LOAD segment. Next is the
-`.bss` section, which occupies no actual space on disk, but its memory image has
-the size enough to contain all global variables and is filled with zeros. This
-section is contained within the second LOAD segment. The last section is
-`.strtab` - string table which contains names of all listed sections.
+Additionally, the produced file contains four sections. The first one is empty
+and is required by ELF standard. The second one is the `.text` section,
+containing executable code. This section is contained within the first LOAD
+segment. Next is the `.bss` section, which occupies no actual space on disk, but
+its memory image has the size enough to contain all global variables and is
+filled with zeros upon loading. This section is contained within the second LOAD
+segment. The last section is `.strtab` - string table which contains names of
+all listed sections.
