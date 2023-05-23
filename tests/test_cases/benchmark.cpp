@@ -35,7 +35,7 @@ static void run_child(int argc, char** argv);
 int run_test_benchmark(int argc, const char* const* argv,
                        const TestConfig* config)
 {
-    size_t repeat_count = 10;
+    size_t repeat_count = 20;
     FILE *output = NULL;
     double *sys_time = NULL, *user_time = NULL;
 
@@ -140,7 +140,7 @@ static int fill_data(int argc, char** argv,
                      double* sys_time, double* user_time, size_t data_size)
 {
     double last_ms = NAN;
-    const size_t repeat = 5;
+    const size_t repeat = 10;
 
     for (size_t i = 0; i < data_size; ++i)
     {

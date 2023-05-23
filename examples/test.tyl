@@ -1,8 +1,8 @@
 fu n main(0
 [
-    var n := 18'
+    var n := 9'
     var result := 0.000'
-    var repeat := 100000'
+    var repeat := 500000'
     var step := 0.000'
 
     vile (step < repeat 0

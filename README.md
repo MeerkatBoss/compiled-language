@@ -1,11 +1,37 @@
 # TypoLang
+
 C-like compiled programming language for people writing code with frequent typos.
 TypoLang is not designed as actual usable programming language, so its syntax
 is not comfortable to use. For example, `0` means closing parentheses and `8`
 means multiplication operator. Because of this specifics, some numbers and
 expressions must be written in a non-obvious way.
 
-## Usage
+## Table Of Contents
+- [TypoLang](#typolang)
+  - [Table Of Contents](#table-of-contents)
+  - [Compiler Usage](#compiler-usage)
+  - [TypoLang User Guide](#typolang-user-guide)
+    - [General Structure](#general-structure)
+    - [Declarations](#declarations)
+      - [Global Variables](#global-variables)
+      - [Functions](#functions)
+    - [Keywords](#keywords)
+    - [Standard Library Functions](#standard-library-functions)
+    - [Constants](#constants)
+    - [Identifiers](#identifiers)
+    - [Expressions](#expressions)
+    - [Statements](#statements)
+    - [Scopes](#scopes)
+  - [Technical Details](#technical-details)
+    - [General Information](#general-information)
+    - [Input Tokenization](#input-tokenization)
+    - [Token Parsing](#token-parsing)
+    - [Middle-end Optimizations](#middle-end-optimizations)
+    - [Backend Intermediate Representation](#backend-intermediate-representation)
+    - [ELF Files](#elf-files)
+    - [Performance Gain](#performance-gain)
+
+## Compiler Usage
 
 To use the TypoLang compiler (tlc) you need to:
 
@@ -32,9 +58,9 @@ To use the TypoLang compiler (tlc) you need to:
 Information about command-line arguments of frontend, mid-end, and backend
 compilers can be obtained by passing `"--help"` or  `"-h"` argument to them.
 
-## TypoLang user guide
+## TypoLang User Guide
 
-### General structure
+### General Structure
 Because TypoLang is a C-like language, program in TypoLang is a sequence of
 *declarations*. User can declare global variables and functions. Each program in
 TypoLang must declare `main` function, as it will be used as program entry
@@ -98,7 +124,7 @@ names:
 - `not`     - boolean 'not' operator
 - `d`       - differentiation operator
 
-### Standard library functions
+### Standard Library Functions
 
 TypoLang standard library provides the following functions:
 
@@ -152,7 +178,7 @@ var second_var := var2 8 function_1'
 Expression is a sequence of operators, constants, and identifiers that
 produce a value.
 
-#### TypoLang Operators
+**TypoLang Operators**
 
 - **Arithmetic:**
   - Addition: `+`
@@ -228,7 +254,7 @@ var z := d (x 8 y + 1 0 / d x
 Statement is a sequence of keywords and expressions which produce no value but
 control the program execution.
 
-#### TypoLang Statements
+**TypoLang Statements**
 
 - **Variable initialization** - define new variable in current scope with given
                                 value
@@ -347,9 +373,9 @@ OUTPUT:
 47000
 ```
 
-## Technical details
+## Technical Details
 
-### General information
+### General Information
 
 The TypoLang compiler is a combination of three distinct programs, called 
 TypoLang frontend, middle-end, and backend compilers. The TypoLang frontend
@@ -440,7 +466,7 @@ Figures 3 and 4 respectively.
 | --- | --- |
 | *Figure 3. Intermediate Representation. IR nodes are denoted with the same color as AST node which produced them.* | *Figure 4. Binary code disassembly. Sections are denoted by the same color as IR node which produced them.* |
 
-### ELF files
+### ELF Files
 
 ELF (Executable and Linking Format) requires:
 
@@ -514,4 +540,19 @@ filled with zeros upon loading. This section is contained within the second LOAD
 segment. The last section is `.strtab` - string table which contains names of
 all listed sections.
 
-#### TODO: Test performance
+### Performance Gain
+
+Change of compiler target platform can vastly improve performance written in
+compiled language. The comparison of [this program](examples/test.tyl)
+performance is shown in Table 2.
+
+*Table 2. Test program performance comparison*
+| Compiler version   | Execution time(ms) | Performance gain (times) |
+| ------------------ | ------------------ | ------------------------ |
+| MeerkatVM compiler | 540 $\pm$ 22       | 1                        |
+| x86-64 compiler    | 23.8 $\pm$ 0.9     | 23 $\pm$ 1.4             |
+
+Change of target platform for TypoLang compiler improved performance by the
+factor of 20.  Additionally, the migration to x86-64 platform removed any
+run-time dependencies of programs written in TypoLang, which makes them more
+convenient for end user. 

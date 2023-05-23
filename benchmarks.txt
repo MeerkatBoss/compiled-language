@@ -1,1 +1,2 @@
-compiled: 12ms (~2ms)
+vm: 540ms (~22ms)
+compiled: 23.8ms (~0.9ms)
