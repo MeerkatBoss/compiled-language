@@ -105,8 +105,8 @@ TypoLang standard library provides the following functions:
 - `read(0`      - read number from `stdin`. The number must be written with
                     exactly three digits after decimal point **WITHOUT** the
                     decimal point itself
-- `print(x 0`   - print number `x` to `stdout` in format described by `read(0`
-- `sqrt(x 0`    - calculate the square root of `x` and return it
+- `print(var x 0`   - print number `x` to `stdout` in format described by `read(0`
+- `sqrt(var x 0`    - calculate the square root of `x` and return it
 
 No function defined in TypoLang program can have the same name as any of the
 functions in standard library.
@@ -126,13 +126,14 @@ respectively. Examples of valid constants are presented in Listing 3.
 var x := 0.0'
 var y := 2'
 var z := 8.000'
+var w := 4.125'
 ```
 
 ### Identifiers
 
 Any sequence of characters [`a-zA-Z0-9_`] not starting with decimal digit is
 interpreted as function or variable name. This means, that the closing
-parentheses ('`0`') and multiplication operator ('`8`') must be separated from
+parentheses '`0`' and multiplication operator '`8`' must be separated from
 their operands with a space, or else they will be interpreted as part of an
 identifier. Examples of valid identifiers are shown in Listing 4.
 
@@ -210,7 +211,7 @@ Table 1 demonstrates precedence of various TypoLang operators.
 Listing 4 shows some examples of TypoLang expressions.
 
 *Listing 4. TypoLang expressions. The last expression is transformed into
-`1 8 y + x 8 0.000 + x`.*
+`1 8 y + x 8 0.000 + 1`.*
 ```
 fu n foo(var x 0 
 [
@@ -219,7 +220,7 @@ fu n foo(var x 0
 
 var x := ( 42 + 45 0 / 2'
 var y := x + foo(x 0 8 x'
-var z := d (x 8 y + x 0 / d x
+var z := d (x 8 y + 1 0 / d x
 ```
 
 ### Statements
@@ -361,9 +362,9 @@ an ELF executable file for x86-64 machines running Linux.
 
 TypoLang compiler is compliant with [AST file standard](
 https://github.com/MeerkatBoss/ast-standard/blob/master/README.md), developed
-by a group of students, including myself. The goal of this standard was to
-create common format of intermediate files to allow cross-compilation of
-standard-compliant languages.
+by a group of MIPT first-year students, including myself. The goal of this
+standard was to create common format of intermediate files to allow
+cross-compilation of standard-compliant languages.
 
 Standard compliance allows interoperability of TypoLang backend and middle-end
 with other standard-compliant frontend compilers. Additionally, AST file
@@ -407,7 +408,8 @@ into a linked list of entries. This list is called *Intermediate Representation
 offsets of `JMP`, `Jcc` and `CALL` instructions. The IR also allows future
 optimizations of bytecode based on analysis of nearby IR entries.
 
-The IR entry is defined as follows:
+The IR entry is defined [here](src/data_structures/itermediate_repr/ir.h) as
+follows:
 ```c
 struct ir_node;
 typedef ir_node* ir_node_ptr;
@@ -431,8 +433,8 @@ struct ir_node
 };
 ```
 
-The IR and disassembled binary code for previously built AST is presented in
-Figures 3 and 4.
+The IR and disassembled binary code for previously built AST are presented in
+Figures 3 and 4 respectively.
 
 | ![TypoLang IR](figures/ir.jpg) | ![TypoLang Disassembly](figures/disasm.jpg) |
 | --- | --- |
