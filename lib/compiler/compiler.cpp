@@ -399,17 +399,18 @@ define_compile(WHILE)
         fprintf(state->output, ".while_%s_0x%zX_start:\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILED_LEFT:
-        fputs("\t\tpush 0", state->output);
-        fprintf(state->output, "\t\t je .while_%s_0x%zX_end\n\n", state->func_name, state->control_flow_cur);
+        fputs("\t\tpush 0\n", state->output);
+        fprintf(state->output, "\t\tje .while_%s_0x%zX_end\n\n", state->func_name, state->control_flow_cur);
         return true;
     case STAGE_COMPILING_RIGHT:
         array_push(&state->control_flow_stack, state->control_flow_cur);
         state->control_flow_cur++;
         return true;
     case STAGE_COMPILED_RIGHT:
-        fprintf(state->output, ".while_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cur);
         state->control_flow_cur = *array_back(&state->control_flow_stack);
         array_pop(&state->control_flow_stack);
+        fprintf(state->output, "\t\tjmp .while_%s_0x%zX_start\n", state->func_name, state->control_flow_cur);
+        fprintf(state->output, ".while_%s_0x%zX_end:\n\n", state->func_name, state->control_flow_cur);
         return true;
     default:
         LOG_ASSERT(0 && "Unreachable code", return false);

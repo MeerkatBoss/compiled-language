@@ -1,0 +1,186 @@
+{
+  DEFS,
+  NULL,
+  {
+    NFUN,
+    main,
+    {},
+    {
+      BLOCK,
+      NULL,
+      {},
+      {
+        SEQ,
+        NULL,
+        {
+          NVAR,
+          n,
+          {},
+          { CONST, 9.000, {}, {} }
+        },
+        {
+          SEQ,
+          NULL,
+          {
+            NVAR,
+            result,
+            {},
+            { CONST, 0.000, {}, {} }
+          },
+          {
+            SEQ,
+            NULL,
+            {
+              NVAR,
+              repeat,
+              {},
+              { CONST, 500000.000, {}, {} }
+            },
+            {
+              SEQ,
+              NULL,
+              {
+                NVAR,
+                step,
+                {},
+                { CONST, 0.000, {}, {} }
+              },
+              {
+                SEQ,
+                NULL,
+                {
+                  WHILE,
+                  NULL,
+                  {
+                    OP,
+                    LT,
+                    { VAR, step, {}, {} },
+                    { VAR, repeat, {}, {} }
+                  },
+                  {
+                    BLOCK,
+                    NULL,
+                    {},
+                    {
+                      SEQ,
+                      NULL,
+                      {
+                        NVAR,
+                        i,
+                        {},
+                        { CONST, 1.000, {}, {} }
+                      },
+                      {
+                        SEQ,
+                        NULL,
+                        {
+                          ASS,
+                          result,
+                          {},
+                          { CONST, 0.001, {}, {} }
+                        },
+                        {
+                          SEQ,
+                          NULL,
+                          {
+                            WHILE,
+                            NULL,
+                            {
+                              OP,
+                              LEQ,
+                              { VAR, i, {}, {} },
+                              { VAR, n, {}, {} }
+                            },
+                            {
+                              BLOCK,
+                              NULL,
+                              {},
+                              {
+                                SEQ,
+                                NULL,
+                                {
+                                  ASS,
+                                  result,
+                                  {},
+                                  {
+                                    OP,
+                                    MUL,
+                                    { VAR, result, {}, {} },
+                                    { VAR, i, {}, {} }
+                                  }
+                                },
+                                {
+                                  SEQ,
+                                  NULL,
+                                  {
+                                    ASS,
+                                    i,
+                                    {},
+                                    {
+                                      OP,
+                                      ADD,
+                                      { VAR, i, {}, {} },
+                                      { CONST, 1.000, {}, {} }
+                                    }
+                                  },
+                                  {}
+                                }
+                              }
+                            }
+                          },
+                          {
+                            SEQ,
+                            NULL,
+                            {
+                              ASS,
+                              step,
+                              {},
+                              {
+                                OP,
+                                ADD,
+                                { VAR, step, {}, {} },
+                                { CONST, 1.000, {}, {} }
+                              }
+                            },
+                            {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  SEQ,
+                  NULL,
+                  {
+                    CALL,
+                    print,
+                    {},
+                    {
+                      PAR,
+                      NULL,
+                      { VAR, result, {}, {} },
+                      {}
+                    }
+                  },
+                  {
+                    SEQ,
+                    NULL,
+                    {
+                      RET,
+                      NULL,
+                      {},
+                      { CONST, 0.000, {}, {} }
+                    },
+                    {}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {}
+}

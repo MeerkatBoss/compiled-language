@@ -1,0 +1,25 @@
+fu n main(0
+[
+    var n := 9'
+    var result := 0.000'
+    var repeat := 500000'
+    var step := 0.000'
+
+    vile (step < repeat 0
+    [
+        var i := 1'
+        result <_ 0.001'
+
+        vile (i <= n 0
+        [
+            result <_ result 8 i'
+            i <_ i + 1'
+        }
+
+        step <_ step + 1'    
+    }
+
+    print(result 0'
+
+    riturn 0.000'
+}
