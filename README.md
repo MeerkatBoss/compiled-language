@@ -1,11 +1,9 @@
 # TypoLang
 C-like compiled programming language for people writing code with frequent typos.
-
-## Interoperability with other languages
-This language supports saving its syntax tree in format, specified by
-[AST file standard](
-https://github.com/MeerkatBoss/ast-standard/blob/master/README.md). This allows
-reverse compilation to and from TypoLang, using AST file as an intermediate.
+TypoLang is not designed as actual usable programming language, so its syntax
+is not comfortable to use. For example, `0` means closing parentheses and `8`
+means multiplication operator. Because of this specifics, some numbers and
+expressions must be written in a non-obvious way.
 
 ## Usage
 
@@ -13,34 +11,34 @@ To use the TypoLang compiler (tlc) you need to:
 
 1. Clone this repo from Github
     ```bash
-    $ git clone https://github.com/MeerkatBoss/compiled-language
-    $ cd compiled-language
+    git clone https://github.com/MeerkatBoss/compiled-language
+    cd compiled-language
     ```
 2. Checkout to `binary_compiler` branch
     ```bash
-    $ git checkout binary_compiler
+    git checkout binary_compiler
     ```
 3. Build `tlc` with GNU Make
     ```bash
-    $ make all
+    make all
     ```
 4. Run `tlc` using GNU Make
     ```bash
-    $ make run_frontend ARGS="<argument list>"
-    $ make run_midend ARGS="<argument list>"
-    $ make run_backend ARGS="<argument list>"
+    make run_frontend ARGS="<argument list>"
+    make run_midend ARGS="<argument list>"
+    make run_backend ARGS="<argument list>"
     ```
 
 Information about command-line arguments of frontend, mid-end, and backend
-compilers can be obtained by passing "--help" or  "-h" argument to them.
+compilers can be obtained by passing `"--help"` or  `"-h"` argument to them.
 
 ## TypoLang user guide
 
 ### General structure
 Because TypoLang is a C-like language, program in TypoLang is a sequence of
 *declarations*. User can declare global variables and functions. Each program in
-TypoLang must declare `main(0` function, as it will be used as program entry
-point by TypoLang compiler. The return value of `main(0` is used as program
+TypoLang must declare `main` function, as it will be used as program entry
+point by TypoLang compiler. The return value of `main` is used as program
 exit code.
 
 ### Declarations
@@ -52,7 +50,14 @@ name.  After variable declaration, an *initializer* **must** follow. The
 initializer is an [expression](#expressions), preceded by `:=` operator. Global
 variable initialization **must** be terminated with `'` operator. Variable name
 is valid to use in global scope only after its initialization. Variable cannot
-appear in its own initializer expression.
+appear in its own initializer expression. Examples of global variable
+declarations are shown in Listing 1.
+
+*Listing 1. Global variable declarations.*
+```
+var x := 21'
+var y := 32 - x'
+```
 
 #### Functions
 Function declaration starts with a keyword `fu n`, followed by function name and
@@ -62,7 +67,20 @@ can be empty. Parameters are defined with `var` keyword followed by parameter
 name. Function declaration **must** be followed by function body: a
 [block statement](#statements). Function body [scope](#scopes) is nested in function
 parameter scope. Function parameters are treated as if they were regular
-variables.
+variables. Syntax for function declaration is demonstrated in Listing 2.
+
+*Listing 2. Function declarations.*
+```
+fu n foo(0
+[
+    riturn 10'
+}
+
+fu n bar(var x, var y 0
+[
+    riturn x + y - foo(0'
+}
+```
 
 ### Keywords
 
@@ -96,18 +114,37 @@ functions in standard library.
 ### Constants
 
 Constants of TypoLang are fixed-precision decimal rational numbers. The decimal
-separator is decimal point '.'. Decimal point can be omitted along with the
+separator is decimal point '`.`'. Decimal point can be omitted along with the
 following digits. If the decimal point is not omitted, it must be followed by at
 least one decimal digit. The integer part of the number can never be omitted.
 Numbers 0.000 and 8.000 must always be written with decimal point or else they
-will be interpreted as closing parentheses or multiplication operator respectively.
+will be interpreted as closing parentheses or multiplication operator
+respectively. Examples of valid constants are presented in Listing 3.
+
+*Listing 3. Valid constants.*
+```
+var x := 0.0'
+var y := 2'
+var z := 8.000'
+```
 
 ### Identifiers
 
-Any sequence of characters 'a-zA-Z0-9_' not starting with decimal digit is
+Any sequence of characters [`a-zA-Z0-9_`] not starting with decimal digit is
 interpreted as function or variable name. This means, that the closing
-parentheses (`0`) and multiplication operator (`8`) must be separated from their
-operands with a space, or else they will be interpreted as part of an identifier.
+parentheses ('`0`') and multiplication operator ('`8`') must be separated from
+their operands with a space, or else they will be interpreted as part of an
+identifier. Examples of valid identifiers are shown in Listing 4.
+
+*Listing 4. Valid identifiers.*
+```
+fu n function_1(0
+[
+    riturn 0.45'
+}
+var var1       := 42 - (6 / function_1 0'
+var second_var := var2 8 function_1'
+```
 
 ### Expressions
 
@@ -156,6 +193,8 @@ Comparison operators compare their operands and produce logic value as a result
 
 Table 1 demonstrates precedence of various TypoLang operators.
 
+*Table 1. TypoLang operator precedence.*
+
 | Operator                          | Precedence |
 | --------------------------------- | ---------- |
 | Grouping                          | 9          |
@@ -168,7 +207,20 @@ Table 1 demonstrates precedence of various TypoLang operators.
 | `aand`                            | 2          |
 | `or`                              | 1          |
 
-*Table 1. TypoLang operator precedence*
+Listing 4 shows some examples of TypoLang expressions.
+
+*Listing 4. TypoLang expressions. The last expression is transformed into
+`1 8 y + x 8 0.000 + x`.*
+```
+fu n foo(var x 0 
+[
+    riturn x + 1'
+}
+
+var x := ( 42 + 45 0 / 2'
+var y := x + foo(x 0 8 x'
+var z := d (x 8 y + x 0 / d x
+```
 
 ### Statements
 
@@ -206,6 +258,37 @@ control the program execution.
   ]
   ```
 
+Various statements of TypoLang are presented in Listing 5.
+
+*Listing 5. TypoLang statements.*
+```
+fu n main(0
+[
+    var x := 0.000'
+    var y := 42'
+
+    vile (x < 32 0
+    [
+        eef (y < 5 0
+        [
+            x <_ x + 2 8 y'
+            y <_ y + 5'
+        }
+        els
+        [
+            x <_ x + y'
+        }
+
+        eef (y . 20 0
+            y <_ y - 12'
+        y <_ y - 3'
+    }
+    print (x 0'
+
+    riturn 0.000'
+}
+```
+
 ### Scopes
 
 Contexts, in which a given variable can be used are defined by the
@@ -223,6 +306,46 @@ separate scope, nested in global and containing function body scope.
 Function declarations cannot appear in scopes other than global. Their names
 exist in their own context and can never be shadowed.
 
+Listing 6 demonstrates examples of TypoLang scoped declarations.
+
+*Listing 6. Scoped declarations*
+```
+var x := 42'
+
+fu n main(0
+[
+    var y := x + read(0'
+    var x := 32 + x'
+
+    print (x 0'
+    print (y 0'
+
+    eef (y < 50 0
+    [
+        var y := y + x'
+        x <_ y 8 3'
+
+        print (x 0'
+        print (y 0'
+    }
+    print (x 0'
+    print (y 0'
+}
+```
+```
+INPUT:
+5000
+OUTPUT:
+47000
+74000
+
+363000
+121000
+
+363000
+47000
+```
+
 ## Technical details
 
 ### General information
@@ -236,23 +359,39 @@ expressions and removing unnecessary operations (such as multiplication by 0 and
 1, addition of 0 etc.). TypoLang backend compiler transforms the AST file into
 an ELF executable file for x86-64 machines running Linux.
 
-Compliance with AST file standard allows TypoLang middle-end and backend
-compilers work with files produced by other standard-compliant frontend
-compilers. Additionally, AST file produced by TypoLang frontend compiler can be
-optimized and compiled using other standard-compliant middle-end and backend
-compilers, which allows for cross-platform compilation.
+TypoLang compiler is compliant with [AST file standard](
+https://github.com/MeerkatBoss/ast-standard/blob/master/README.md), developed
+by a group of students, including myself. The goal of this standard was to
+create common format of intermediate files to allow cross-compilation of
+standard-compliant languages.
+
+Standard compliance allows interoperability of TypoLang backend and middle-end
+with other standard-compliant frontend compilers. Additionally, AST file
+produced by TypoLang frontend compiler can be optimized and compiled using other
+standard-compliant middle-end and backend compilers, which allows for
+cross-platform compilation.
 
 ### Input Tokenization
 
 Before converting the input TypoLang file to Abstract Syntax Tree, the TypoLang
 frontend compiler performs its *tokenization*, extracting TypoLang keywords and
-operators, variable and function names, and constant values.
+operators, variable and function names, and constant values. Figure 1 shows
+the result of tokenization of TypoLang code fragment.
+
+| ![TypoLang tokenization](figures/tokenization.png) |
+| --- |
+| *Figure 1. Code tokenization. Different tokens are denoted by different colors.* |
 
 ### Token Parsing
 
 TypoLang frontend compiler passes the list of produced tokens to *parser*, which
 converts it into AST using the recursive descent algorithm. The produced AST
-is written into output file in a standard-compliant format.
+is written into output file in a standard-compliant format. The AST for
+previously tokenized code fragment is shown in Figure 2.
+
+| ![TypoLang AST](figures/ast.jpg) |
+| --- |
+| *Figure 2. Abstract Syntax Tree. Different node types are denoted by different colors.* |
 
 ### Middle-end Optimizations
 
@@ -267,6 +406,37 @@ into a linked list of entries. This list is called *Intermediate Representation
 (IR)*. Usage of IR allows the backend compiler to efficiently calculate target
 offsets of `JMP`, `Jcc` and `CALL` instructions. The IR also allows future
 optimizations of bytecode based on analysis of nearby IR entries.
+
+The IR entry is defined as follows:
+```c
+struct ir_node;
+typedef ir_node* ir_node_ptr;
+struct ir_node
+{
+    size_t          node_id;        // Node identifier (for debug purposes)
+    bool            is_valid;       // Validity flag
+
+    ir_op           operation;      // Operation type
+    ir_operand      operand1,       // First operand of instruction
+                    operand2;       // Second operand of instruction
+    ir_cond_flags   flags;          // Condition flags for conditional commands
+                                    // (CMOVcc and Jcc)
+    ir_node_ptr     jump_target;    // Target of JMP, Jcc or CALL instruction
+    size_t          addr;           // Instruction address
+
+    size_t          encoded_length; // Length of instruction byte code
+    unsigned char   bytes[16];      // Instruction byte code
+
+    ir_node_ptr     next;           // Pointer to next node in linked list
+};
+```
+
+The IR and disassembled binary code for previously built AST is presented in
+Figures 3 and 4.
+
+| ![TypoLang IR](figures/ir.jpg) | ![TypoLang Disassembly](figures/disasm.jpg) |
+| --- | --- |
+| *Figure 3. Intermediate Representation. IR nodes are denoted with the same color as AST node which produced them.* | *Figure 4. Binary code disassembly. Sections are denoted by the same color as IR node which produced them.* |
 
 ### ELF files
 
@@ -341,3 +511,5 @@ its memory image has the size enough to contain all global variables and is
 filled with zeros upon loading. This section is contained within the second LOAD
 segment. The last section is `.strtab` - string table which contains names of
 all listed sections.
+
+#### TODO: Test performance

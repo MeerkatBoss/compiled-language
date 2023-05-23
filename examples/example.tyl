@@ -1,0 +1,10 @@
+fu n main(0
+[
+    var x := 0.000'
+    eef (x < 0.000 0
+        x <_ x + 10'
+    els
+        x <_ x - 5'
+        
+    riturn 0.000'
+}

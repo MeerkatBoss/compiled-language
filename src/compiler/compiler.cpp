@@ -416,28 +416,14 @@ define_compile(DEFS)
 
 define_compile(NVAR)
 {
-    switch (stage)
-    {
-        case STAGE_COMPILING_RIGHT:
-        {
-            table_stack_add_var(&state->name_scope,
-                                                        node->value.name);
-            if (table_stack_is_at_global_scope(&state->name_scope))
-                ++ state->global_var_cnt;
+    if (stage != STAGE_COMPILED_RIGHT)
+        return true;
+    table_stack_add_var(&state->name_scope, node->value.name);
+    if (table_stack_is_at_global_scope(&state->name_scope))
+        ++ state->global_var_cnt;
 
-            return true;
-        }
-        case STAGE_COMPILED_RIGHT:
-            return compile(ASS, COMPILED_RIGHT);    // Initialization is compiled the same way as assignment
-        case STAGE_COMPILING_LEFT:
-        case STAGE_COMPILED_LEFT:
-            return true;    // Nothing to do here
-        default:
-            LOG_ASSERT(0 && "Invalid enum value", return false);
-            return false;
-    }
-    LOG_ASSERT(0 && "Invalid enum value", return false);
-    return false;
+    return compile(ASS, COMPILED_RIGHT); // Initialization is compiled the
+                                            // same way as assignment
 }
 
 define_compile(NFUN)
