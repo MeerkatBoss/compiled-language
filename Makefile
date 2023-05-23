@@ -131,7 +131,7 @@ cleaner: clean
 run_%: $(BINDIR)/$(PROJECT)_%
 	@$< $(ARGS)
 
-test: $(TEST_BIN_NAME)
+test: $(BINDIR)/$(TEST_BIN_NAME)
 	@$< $(ARGS)
 
 .PHONY: all remake clean cleaner
