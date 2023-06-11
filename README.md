@@ -1,10 +1,10 @@
 # TypoLang
 
-C-like compiled programming language for people writing code with frequent typos.
-TypoLang is not designed as actual usable programming language, so its syntax
-is not comfortable to use. For example, `0` means closing parentheses and `8`
-means multiplication operator. Because of this specifics, some numbers and
-expressions must be written in a non-obvious way.
+C-like esoteric compiled programming language for people writing code with
+frequent typos. TypoLang is not designed as actual usable programming language,
+so its syntax is deliberately uncomfortable to use. For example, `0` means
+closing parentheses and `8` denotes multiplication operator. Because of this
+specifics, some numbers and expressions must be written in a non-obvious way.
 
 ## Table Of Contents
 - [TypoLang](#typolang)
@@ -40,15 +40,11 @@ To use the TypoLang compiler (tlc) you need to:
     git clone https://github.com/MeerkatBoss/compiled-language
     cd compiled-language
     ```
-2. Checkout to `binary_compiler` branch
-    ```bash
-    git checkout binary_compiler
-    ```
-3. Build `tlc` with GNU Make
+2. Build `tlc` with GNU Make
     ```bash
     make all
     ```
-4. Run `tlc` using GNU Make
+3. Run `tlc` using GNU Make
     ```bash
     make run_frontend ARGS="<argument list>"
     make run_midend ARGS="<argument list>"
@@ -169,8 +165,8 @@ fu n function_1(0
 [
     riturn 0.45'
 }
-var var1       := 42 - (6 / function_1 0'
-var second_var := var2 8 function_1'
+var var1       := 42 - (6 / function_1(0 0'
+var second_var := var2 8 function_1(0'
 ```
 
 ### Expressions
@@ -200,7 +196,7 @@ produce a value.
     - `1=`          - not equal
 - **Function call:**
   - *function-name*`(`*arg1*`,` *arg2*`,` ... `0` - call function *function-name*
-                                                    with argumets *arg1*, *arg2*, ...
+                                                    with arguments *arg1*, *arg2*, ...
 - **Differentiation:**
   - `d(` *expression* `0 / d` *var-name* - transform *expression* containing
                                             only arithmetic operators, grouping
@@ -392,10 +388,10 @@ by a group of MIPT first-year students, including myself. The goal of this
 standard was to create common format of intermediate files to allow
 cross-compilation of standard-compliant languages.
 
-Standard compliance allows interoperability of TypoLang backend and middle-end
-with other standard-compliant frontend compilers. Additionally, AST file
-produced by TypoLang frontend compiler can be optimized and compiled using other
-standard-compliant middle-end and backend compilers, which allows for
+Standard compliance allows for interoperability of TypoLang backend and
+middle-end with other standard-compliant frontend compilers. Additionally, AST
+file produced by TypoLang frontend compiler can be optimized and compiled using
+other standard-compliant middle-end and backend compilers, which allows for
 cross-platform compilation.
 
 ### Input Tokenization
@@ -434,9 +430,9 @@ into a linked list of entries. This list is called *Intermediate Representation
 offsets of `JMP`, `Jcc` and `CALL` instructions. The IR also allows future
 optimizations of bytecode based on analysis of nearby IR entries.
 
-The IR entry is defined [here](src/data_structures/itermediate_repr/ir.h) as
+The IR entry is defined [here](src/data_structures/intermediate_repr/ir.h) as
 follows:
-```c
+```cpp
 struct ir_node;
 typedef ir_node* ir_node_ptr;
 struct ir_node
@@ -497,7 +493,7 @@ typedef struct {
 typedef struct {
     uint32_t   p_type;      // Segment type
     uint32_t   p_flags;     // Segment flags (Read/Write/Execute)
-    Elf64_Off  p_offset;    // Segment start file offset
+    Elf64_Off  p_offset;    // Segment start file offset (page-aligned)
     Elf64_Addr p_vaddr;     // Segment start virtual address
     Elf64_Addr p_paddr;     // Segment start physical address (equal to virtual
                             // on Linux)
@@ -518,8 +514,8 @@ typedef struct {
     Elf64_Addr sh_addr;     // Section address in memory
     Elf64_Off  sh_offset;   // Section start file offset
     uint64_t   sh_size;     // Size of section
-    uint32_t   sh_link;     // Helper field
-    uint32_t   sh_info;     // Helper field
+    uint32_t   sh_link;     // Helper field (unused in this compiler)
+    uint32_t   sh_info;     // Helper field (unused in this compiler)
     uint64_t   sh_addralign;// Alignment requirement
     uint64_t   sh_entsize;  // Size of entry (for sections containing entries
                             // of fixed size)
@@ -533,12 +529,18 @@ written to and contains space reserved for global variables.
 
 Additionally, the produced file contains four sections. The first one is empty
 and is required by ELF standard. The second one is the `.text` section,
-containing executable code. This section is contained within the first LOAD
-segment. Next is the `.bss` section, which occupies no actual space on disk, but
-its memory image has the size enough to contain all global variables and is
-filled with zeros upon loading. This section is contained within the second LOAD
-segment. The last section is `.strtab` - string table which contains names of
-all listed sections.
+containing executable code: standard library functions and compiler-produced
+instructions. This section is contained within the first LOAD segment. Next is
+the `.bss` section, which occupies no actual space on disk, but its memory image
+has the size enough to contain all global variables and is filled with zeros
+upon loading. This section is contained within the second LOAD segment. The last
+section is `.strtab` - string table which contains names of all listed sections.
+
+Structure of compiler-produced ELF file is shown in Figure 5.
+
+| <img alt="Elf file structure" src="figures/elf_file.jpg" height="500"> |
+| --- |
+| *Figure 5. Compiler-produced ELF file structure.* |
 
 ### Performance Gain
 
@@ -549,7 +551,7 @@ performance is shown in Table 2.
 *Table 2. Test program performance comparison*
 | Compiler version   | Execution time(ms) | Performance gain (times) |
 | ------------------ | ------------------ | ------------------------ |
-| MeerkatVM compiler | 540 $\pm$ 22       | 1                        |
+| [MeerkatVM compiler](https://github.com/MeerkatBoss/compiled-language/tree/meerkat_vm) | 540 $\pm$ 22 | 1 |
 | x86-64 compiler    | 23.8 $\pm$ 0.9     | 23 $\pm$ 1.4             |
 
 Change of target platform for TypoLang compiler improved performance by the
