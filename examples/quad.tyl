@@ -44,7 +44,7 @@ fu n preent_rots( var cnt 0
         print( x2 0'
     }
     els 
-        print( print( 999.999 0 0'
+        print( 999.999 0'
     
     riturn cnt'
 }

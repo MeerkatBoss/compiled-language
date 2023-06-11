@@ -1,153 +1,112 @@
-; stdlib.asm
+section .text
 
+print_num:	push		rbp
+		mov		rbp,		rsp
+		sub		rsp,		32
 
-; print(x)
-print:		dup
-		out
+		lea		rdi,		[rbp - 2]	; End of buffer in rdi
+		mov	BYTE	[rdi+1],	0x0A		; Terminate with '\n'
+
+		mov		rax,		[rbp + 16]	; Converted number in rax
+		mov		rsi,		10		; Divisor in rsi
+
+		xor		rcx,		rcx		; Total char count in rcx
+		inc		rcx
+
+		cmp		rax,		0
+		jge		.fill_chars
+		imul		rax,		rax,		-1
+
+.fill_chars:	xor		rdx,		rdx
+		idiv		rsi
+
+		add		dl,		0x30		; '0'
+		mov	BYTE	[rdi],		dl
+		dec		rdi
+		inc		rcx
+
+		test		rax,		rax
+		jnz		.fill_chars
+
+		cmp	QWORD	[rbp + 16],	0
+		jge		.print
+		mov	BYTE	[rdi],		0x2D		; '-'
+		dec		rdi
+		inc		rcx
+
+.print		xor		rdi,		rdi
+		inc		rdi				; rdi = 1 (stdout)
+		mov		rsi,		rbp
+		sub		rsi,		rcx		; buf addr in rsi
+		mov		rdx,		rcx		; buf size in rdx
+		
+		xor		rax,		rax,
+		inc		rax				; rax = 1 (write)
+
+		syscall
+
+		add		rsp,		32
+		pop		rbp
+.end:		ret
+
+read_num:	push		rbp
+		mov		rbp,		rsp
+		sub		rsp,		32
+
+		xor		rdi,		rdi		; rdi = 0 (stdin)
+		mov		rsi,		rsp		; rsi = buf addr
+		mov		rdx,		32		; rdx = buf size
+		xor		rax,		rax		; read
+		syscall
+
+		dec		rax
+		jz		.end
+
+		mov		rdi,		1		; sign in rdi
+		mov		rcx,		rax		; char count in rcx
+		xor		rax,		rax		; result in rax
+		xor		rdx,		rdx		; zero-out rdx
+		mov		rsi,		rsp		; start of buffer in rsi
+		
+		cmp	BYTE	[rsi],		0x2D		; '-'
+		jne		.convert_num
+		mov		rdi,		-1
+		inc		rsi
+		dec		rcx
+
+.convert_num:	imul		rax,		rax,		10
+		mov		dl,	BYTE	[rsi]
+		sub		dl,		0x30
+		add		rax,		rdx
+
+		inc		rsi
+		dec		rcx
+		jnz		.convert_num
+
+		imul		rax,		rdi
+
+.end:		add		rsp,		32
+		pop		rbp
 		ret
 
-; read()
-read:		get
-		ret
+sqrt:		push		rbp
+		mov		rbp,		rsp
 
-; abs(x)
-abs:		dup
-		push 0
-		jle abs.neg
-		ret
-abs.neg:	push -1
-		mul
-		ret
+		mov		rax,		1000
+		vpbroadcastq	xmm1,		rax
+		vcvtqq2pd	xmm1,		xmm1
 
+		movq		xmm0,	QWORD	[rbp + 16]
+		vcvtqq2pd	xmm0,		xmm0
 
-%def vbuf.y0 20
-%def vbuf.x0 50
-%def vbuf.height 41
-%def vbuf.width 101
-%def vbuf.start 61395
+		vdivpd		xmm0,		xmm0,		xmm1
+		sqrtsd		xmm0,		xmm0
+		vmulpd		xmm0,		xmm0,		xmm1
 
-; set_pixel(x, y, ch)
-set_pixel:	push rax
-		pop [rsp]		; store rax in [rsp]
-		push rbx
-		pop [rsp+1]		; store rbx in [rsp+1]
-		push rdx
-		pop [rsp+2]		; store rdx in [rsp+2]
+		vcvtpd2qq	xmm0,		xmm0
 
-		push 1000
-		div
-		pop rdx			; rdx = ch / 1000
+		movq		rax,		xmm0
 
-		push -1
-		mul
-		push vbuf.height
-		mul
-		push 2000
-		div
-		push vbuf.y0
-		add
-		pop rbx			; rbx = (-y * h)/2000 + y0
-
-		push vbuf.width
-		mul
-		push 2000
-		div
-		push vbuf.x0
-		add
-		pop rax			; rax = (x * w)/2000 + x0
-
-		push vbuf.width
-		push rbx
-		mul
-		push rax
-		add
-		pop rax			; rax = rbx*2 + rax
-
-		push rdx
-		pop [vbuf.start+rax]	; set pixel in memory
-
-		push rdx
-
-		push [rsp]
-		pop rax			; restore rax from [rsp]
-		push [rsp+1]
-		pop rbx			; restore rbx from [rsp+1]
-		push [rsp+2]
-		pop rdx			; restore rdx from [rsp+2]
-
-		ret
-
-; flush()
-flush:		push vbuf.start
-		pop vbp
-		push 0
-		ret
-
-
-%def sq.min 0
-%def sq.max 100000000
-
-; sqrt(x)
-sqrt:		push rax		; save rax in [rsp]	
-		pop [rsp]
-
-		push 10
-		mul
-		pop rax			; rax = 10*x
-
-		push rbx		; save register values
-		push rcx
-		push rdx
-
-		push sq.min
-		pop rbx			; rbx = sq.min
-
-		push sq.max
-		pop rdx			; rdx = sq.max
-
-sq.loop.start:	push rdx
-		push rbx
-		sub
-		push 1
-		jle sq.loop.end		; if (rdx - rbx <= 1) break;
-
-		push rbx
-		push rdx
-		add
-		push 2
-		div			; m = (rbx + rdx)/2
-
-		pop rcx			; rcx = m
-
-		push rcx		; m
-
-		push rax
-		push rcx
-		div			; rax / m
-
-		jg sq.greater
-
-		push rcx		; if (m <= rax/m) rbx = m;
-		pop rbx
-		jmp sq.loop.start
-
-sq.greater:	push rcx
-		pop rdx
-		jmp sq.loop.start	; else rdx = m;
-
-sq.loop.end:	push rbx
-		push 10
-		mul
-		pop rax			; rax = 10*rbx (normalized with fixed precision)
-
-		pop rdx
-		pop rcx
-		pop rbx			; restore register values
-
-		push rax		; return rax
-
-		push [rsp]
-		pop rax			; restore rax from [rsp]
-
+		pop		rbp
 		ret
 
