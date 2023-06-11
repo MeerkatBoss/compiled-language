@@ -405,8 +405,8 @@ frontend compiler performs its *tokenization*, extracting TypoLang keywords and
 operators, variable and function names, and constant values. Figure 1 shows
 the result of tokenization of TypoLang code fragment.
 
-| <img alt="TypoLang tokenization" src="figures/tokenization.png"> |
-| --- |
+| <img alt="TypoLang tokenization" src="figures/tokenization.png" height="150"> |
+|:--- |
 | *Figure 1. Code tokenization. Different tokens are denoted by different colors.* |
 
 ### Token Parsing
@@ -416,8 +416,8 @@ converts it into AST using the recursive descent algorithm. The produced AST
 is written into output file in a standard-compliant format. The AST for
 previously tokenized code fragment is shown in Figure 2.
 
-| <img alt="TypoLang AST" src="figures/ast.jpg" height="500"> |
-| --- |
+| <img alt="TypoLang AST" src="figures/ast.jpg" height="400"> |
+|:--- |
 | *Figure 2. Abstract Syntax Tree. Different node types are denoted by different colors.* |
 
 ### Middle-end Optimizations
@@ -462,7 +462,7 @@ struct ir_node
 The IR and disassembled binary code for previously built AST are presented in
 Figures 3 and 4 respectively.
 
-| <img alt="TypoLang IR" src="figures/ir.jpg" height=500> | <img alt="TypoLang Disassembly" src="figures/disasm.jpg" height="500"> |
+| <img alt="TypoLang IR" src="figures/ir.jpg" height=600> | <img alt="TypoLang Disassembly" src="figures/disasm.jpg" height="600"> |
 | --- | --- |
 | *Figure 3. Intermediate Representation. IR nodes are denoted with the same color as AST node which produced them.* | *Figure 4. Binary code disassembly. Sections are denoted by the same color as IR node which produced them.* |
 
