@@ -1,10 +1,10 @@
 # TypoLang
 
-C-like esoteric compiled programming language for people writing code with
-frequent typos. TypoLang is not designed as actual usable programming language,
-so its syntax is deliberately uncomfortable to use. For example, `0` means
-closing parentheses and `8` denotes multiplication operator. Because of this
-specifics, some numbers and expressions must be written in a non-obvious way.
+TypoLang is a c-like esoteric compiled programming language for people writing
+code with frequent typos. TypoLang is not designed as actual usable programming
+language, so its syntax is deliberately uncomfortable to use. For example, `0`
+means closing parentheses and `8` denotes multiplication operator. Because of
+this specifics, some numbers and expressions must be written in a non-obvious way.
 
 ## Table Of Contents
 - [TypoLang](#typolang)
@@ -54,7 +54,11 @@ To use the TypoLang compiler (tlc) you need to:
 Information about command-line arguments of frontend, mid-end, and backend
 compilers can be obtained by passing `"--help"` or  `"-h"` argument to them.
 
+
 ## TypoLang User Guide
+
+<details>
+<summary><i>User Guide</i></summary>
 
 ### General Structure
 Because TypoLang is a C-like language, program in TypoLang is a sequence of
@@ -369,6 +373,8 @@ OUTPUT:
 47000
 ```
 
+</details>
+
 ## Technical Details
 
 ### General Information
@@ -376,11 +382,11 @@ OUTPUT:
 The TypoLang compiler is a combination of three distinct programs, called 
 TypoLang frontend, middle-end, and backend compilers. The TypoLang frontend
 compiler transforms the input file written in TypoLang into an Abstract Syntax
-Tree (AST) and writes it in standard-compliant file format. TypoLang middle-end
-compiler performs optimizations of produced syntax tree, collapsing constant
-expressions and removing unnecessary operations (such as multiplication by 0 and
-1, addition of 0 etc.). TypoLang backend compiler transforms the AST file into
-an ELF executable file for x86-64 machines running Linux.
+Tree (AST) and writes it into a file. TypoLang middle-end compiler optimizes
+produced syntax tree, collapsing constant expressions and removing unnecessary
+operations (such as multiplication by 0 and 1, addition of 0 etc.). TypoLang
+backend compiler transforms the AST file into an ELF executable file for
+x86-64 machines running Linux.
 
 TypoLang compiler is compliant with [AST file standard](
 https://github.com/MeerkatBoss/ast-standard/blob/master/README.md), developed
@@ -420,14 +426,14 @@ previously tokenized code fragment is shown in Figure 2.
 
 TypoLang middle-end compiler reads the AST from file produced by frontend and
 analyzes it, finding patterns which can be optimized. The optimized tree is then
-written using the same format into an output file.
+written using the same format into another file.
 
 ### Backend Intermediate Representation
 
 Before producing x86-64 bytecode, TypoLang backend compiler converts the AST
 into a linked list of entries. This list is called *Intermediate Representation
-(IR)*. Usage of IR allows the backend compiler to efficiently calculate target
-offsets of `JMP`, `Jcc` and `CALL` instructions. The IR also allows future
+(IR)*. Usage of IR allows the backend compiler to efficiently calculate the
+target offsets of `JMP`, `Jcc` and `CALL` instructions. The IR also allows future
 optimizations of bytecode based on analysis of nearby IR entries.
 
 The IR entry is defined [here](src/data_structures/intermediate_repr/ir.h) as
@@ -522,6 +528,10 @@ typedef struct {
 } Elf64_Shdr;
 ```
 
+ELF segment headers are used to describe the memory image of the executed
+program. Section headers denote parts of the file and its memory image serving
+different purposes.
+
 The ELF file produced by TypoLang backend compiler contains two segments of type
 LOAD, which are loaded into memory before execution. The first segment can be
 read and executed and contains binary code. The second one can be read from and
@@ -530,11 +540,13 @@ written to and contains space reserved for global variables.
 Additionally, the produced file contains four sections. The first one is empty
 and is required by ELF standard. The second one is the `.text` section,
 containing executable code: standard library functions and compiler-produced
-instructions. This section is contained within the first LOAD segment. Next is
-the `.bss` section, which occupies no actual space on disk, but its memory image
-has the size enough to contain all global variables and is filled with zeros
-upon loading. This section is contained within the second LOAD segment. The last
+instructions. This section exists both in the file and in its memory image and
+must be available for execution, so the first LOAD segment maps it to memory.
+Next is the `.bss` section, which occupies no actual space on disk, but its memory
+image has the enough space to contain all global variables and is filled with zeros
+upon loading. This section is loaded by the second LOAD segment. The last
 section is `.strtab` - string table which contains names of all listed sections.
+This section is not mapped to memory.
 
 Structure of compiler-produced ELF file is shown in Figure 5.
 
@@ -544,15 +556,20 @@ Structure of compiler-produced ELF file is shown in Figure 5.
 
 ### Performance Gain
 
+The [previous compiler version
+](https://github.com/MeerkatBoss/compiled-language/tree/meerkat_vm) produced
+code for a virtual machine - [MeerkatVM
+](https://github.com/MeerkatBoss/MeerkatVM).
+
 Change of compiler target platform can vastly improve performance written in
 compiled language. The comparison of [this program](examples/test.tyl)
 performance is shown in Table 2.
 
 *Table 2. Test program performance comparison*
-| Compiler version   | Execution time(ms) | Performance gain (times) |
-| ------------------ | ------------------ | ------------------------ |
-| [MeerkatVM compiler](https://github.com/MeerkatBoss/compiled-language/tree/meerkat_vm) | 540 $\pm$ 22 | 1 |
-| x86-64 compiler    | 23.8 $\pm$ 0.9     | 23 $\pm$ 1.4             |
+| Compiler version   | Execution time (ms) | Performance gain (times) |
+| ------------------ | -------------------:| ------------------------:|
+| MeerkatVM compiler |        540 $\pm$ 22 |                        1 |
+| x86-64 compiler    |      23.8 $\pm$ 0.9 |             23 $\pm$ 1.4 |
 
 Change of target platform for TypoLang compiler improved performance by the
 factor of 20.  Additionally, the migration to x86-64 platform removed any
